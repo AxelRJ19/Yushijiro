@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso | Panel Yushijiro</title>
+    <link rel="shortcut icon" href="../img/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&family=Viaoda+Libre&display=swap" rel="stylesheet">
+    <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+        --bg: #070707; --card: #111111; --border: rgba(255,255,255,0.09);
+        --blanco: #fff; --gris: #888; --rojo: #c40f0f; --rojo2: #940b0b;
+    }
+    body {
+        min-height: 100dvh;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Segoe UI", sans-serif;
+        color: var(--blanco);
+        background-image:
+            radial-gradient(circle at 20% 20%, rgba(196,15,15,0.15), transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(255,255,255,0.03), transparent 40%);
+    }
+    .card {
+        width: 100%;
+        max-width: 380px;
+        padding: 40px 32px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        margin: 16px;
+    }
+    .logo-wrap { text-align: center; margin-bottom: 28px; }
+    .logo-wrap img {
+        width: 72px; height: 72px;
+        object-fit: contain; border-radius: 16px;
+        background: rgba(255,255,255,0.06);
+        padding: 10px; border: 1px solid var(--border);
+        margin-bottom: 12px; display: inline-block;
+    }
+    .logo-wrap h1 {
+        font-family: "RocknRoll One", sans-serif;
+        font-size: 20px; letter-spacing: 0.04em;
+    }
+    .logo-wrap p { font-size: 13px; color: var(--gris); margin-top: 4px; }
+    .field { margin-bottom: 16px; }
+    .field label {
+        display: block; font-size: 11px; color: #bdbdbd;
+        text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;
+    }
+    .field input {
+        width: 100%; padding: 11px 14px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--border);
+        border-radius: 10px; color: var(--blanco);
+        font-size: 14px; outline: none;
+        transition: border 0.2s; font-family: inherit;
+    }
+    .field input:focus { border-color: rgba(255,255,255,0.3); }
+    .btn {
+        width: 100%; padding: 13px;
+        background: var(--rojo); border: none;
+        border-radius: 10px; color: #fff;
+        font-size: 15px; font-weight: 600;
+        cursor: pointer; transition: background 0.2s; margin-top: 4px;
+    }
+    .btn:hover { background: var(--rojo2); }
+    .btn:disabled { opacity: 0.6; cursor: default; }
+    .error {
+        margin-top: 14px; padding: 10px 14px;
+        background: rgba(196,15,15,0.15);
+        border: 1px solid rgba(196,15,15,0.3);
+        border-radius: 8px; font-size: 13px;
+        color: #ff8080; display: none;
+    }
+    .error.show { display: block; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="logo-wrap">
+        <img src="../img/logo.png" alt="Logo Yushijiro">
+        <h1>Yushijiro San</h1>
+        <p>Panel de Envios &mdash; Acceso administrativo</p>
+    </div>
+    <form id="login-form">
+        <div class="field">
+            <label>Usuario</label>
+            <input type="text" id="inp-user" autocomplete="username" placeholder="admin">
+        </div>
+        <div class="field">
+            <label>Contrasena</label>
+            <input type="password" id="inp-pass" autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+        </div>
+        <button class="btn" type="submit" id="btn-submit">Ingresar al Panel</button>
+        <div class="error" id="error-msg"></div>
+    </form>
+</div>
+<script>
+document.getElementById('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const user = document.getElementById('inp-user').value.trim();
+    const pass = document.getElementById('inp-pass').value;
+    const err  = document.getElementById('error-msg');
+    const btn  = document.getElementById('btn-submit');
+    err.classList.remove('show');
+    if (!user || !pass) { err.textContent = 'Ingresa usuario y contrasena'; err.classList.add('show'); return; }
+    btn.disabled = true;
+    btn.textContent = 'Verificando...';
+    try {
+        const res  = await fetch('../api/panel-login.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ user, pass })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            window.location.replace('index.html');
+        } else {
+            err.textContent = data.error || 'Error de autenticacion';
+            err.classList.add('show');
+        }
+    } catch {
+        err.textContent = 'Error de conexion. Intenta de nuevo.';
+        err.classList.add('show');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Ingresar al Panel';
+    }
+});
+</script>
+</body>
+</html>

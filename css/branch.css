@@ -1,0 +1,79 @@
+/* ===== SUCURSAL PAGES ===== */
+
+.branch-hero {
+    max-width: var(--ancho); margin: 0 auto; padding-top: 130px; position: relative;
+}
+.branch-hero img {
+    width: 100%; min-height: 54vh; max-height: 650px;
+    object-fit: cover; border-radius: 18px; filter: brightness(0.45);
+}
+.branch-hero-text {
+    position: absolute; left: min(6vw,48px); bottom: min(8vh,54px);
+    max-width: 62ch; padding-right: 16px;
+}
+.branch-hero-text h1 { font-family: "Viaoda Libre", serif; font-size: clamp(2rem,7vw,4.2rem); margin-bottom: 8px; }
+
+.branch-contenido {
+    max-width: var(--ancho); margin: 0 auto;
+    display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    gap: 16px; align-items: stretch;
+}
+.branch-card {
+    border: 1px solid rgba(255,255,255,0.22); border-radius: 16px;
+    background-color: rgba(255,255,255,0.04); padding: 18px; display: grid; gap: 12px; height: 100%;
+}
+.branch-card h2 { font-family: "Viaoda Libre", serif; font-size: clamp(1.8rem,4vw,2.5rem); }
+.branch-card p strong { color: #fff; }
+.branch-actions { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin-top: 6px; }
+.branch-card.mapa iframe { width: 100%; height: 100%; min-height: 360px; border: 0; border-radius: 12px; }
+
+.branch-narrativa { max-width: var(--ancho); margin: 0 auto; display: grid; gap: 14px; }
+.branch-narrativa h2 { font-family: "Viaoda Libre", serif; font-size: clamp(2rem,5vw,3.1rem); line-height: 1.15; margin-bottom: 12px; }
+.branch-narrativa-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.branch-text-block {
+    border: 1px solid rgba(255,255,255,0.22); border-radius: 14px;
+    padding: 16px; background-color: rgba(255,255,255,0.04); display: grid; gap: 10px;
+}
+.branch-text-block h3 { font-size: 1.08rem; }
+.branch-copy-quote {
+    border-left: 3px solid rgba(255,255,255,0.6); padding: 10px 14px;
+    color: #f2f2f2; font-size: 1.03rem; background-color: rgba(255,255,255,0.03); border-radius: 6px;
+}
+.branch-mini-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.branch-mini-card {
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;
+    padding: 14px; background-color: rgba(255,255,255,0.03); display: grid; gap: 8px;
+}
+
+/* Botones sucursal */
+.btn-sucursal {
+    text-align: center; font-size: 0.82rem; border-radius: 8px; padding: 9px 8px;
+    border: 1px solid transparent; background-color: var(--rojo);
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+.btn-sucursal:hover { background-color: var(--rojo-oscuro); }
+.btn-sucursal.secundaria { background-color: transparent; border-color: rgba(255,255,255,0.62); }
+.btn-sucursal.secundaria:hover { background-color: rgba(255,255,255,0.12); }
+.btn-sucursal.terciaria { background-color: #242424; }
+.btn-sucursal.terciaria:hover { background-color: #2f2f2f; }
+.link-menu-pdf { display: inline-block; color: #ffd5d5; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.link-menu-pdf:hover { color: #fff; }
+
+/* ===== RESPONSIVE BRANCH ===== */
+@media (max-width: 1100px) {
+    .branch-contenido { grid-template-columns: 1fr; }
+    .branch-mini-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 860px) {
+    .branch-hero { padding-top: 160px; }
+}
+@media (max-width: 620px) {
+    .branch-hero-text { left: 16px; right: 16px; bottom: 26px; padding-right: 0; }
+    .branch-card { padding: 14px; }
+    .branch-card.mapa iframe { min-height: 300px; }
+    .branch-narrativa-grid, .branch-mini-grid { grid-template-columns: 1fr; }
+    .branch-actions { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+}

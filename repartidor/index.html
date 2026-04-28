@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#070707">
+    <title>Yushijiro Repartidor</title>
+    <link rel="shortcut icon" href="../img/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap" rel="stylesheet">
+    <style>
+/* ============================================================
+   RESET & BASE
+============================================================ */
+:root {
+    --bg:       #070707;
+    --bg2:      #101010;
+    --bg3:      #181818;
+    --card:     #111111;
+    --border:   rgba(255,255,255,0.09);
+    --border2:  rgba(255,255,255,0.18);
+    --blanco:   #ffffff;
+    --gris:     #888888;
+    --gris2:    #bdbdbd;
+    --rojo:     #c40f0f;
+    --rojo2:    #940b0b;
+    --rojo-glow:rgba(196,15,15,0.2);
+    --verde:    #22c55e;
+    --verde-bg: rgba(34,197,94,0.12);
+    --azul:     #3b82f6;
+    --azul-bg:  rgba(59,130,246,0.12);
+    --amarillo: #f59e0b;
+    --amar-bg:  rgba(245,158,11,0.12);
+    --r: 14px;
+    --rs: 10px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { width:100%; height:100%; overflow:hidden; background:var(--bg); }
+body {
+    font-family: "Segoe UI", sans-serif;
+    color: var(--blanco);
+    font-size: 15px;
+    line-height: 1.45;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background: #000;
+}
+/* Contenedor tipo teléfono */
+#app {
+    width: 100%;
+    max-width: 430px;
+    height: 100dvh;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+a { color:inherit; text-decoration:none; }
+button { cursor:pointer; font-family:inherit; border:0; }
+img { display:block; }
+input, textarea { font-family:inherit; }
+
+/* ============================================================
+   PANTALLAS
+============================================================ */
+.screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(20px);
+    transition: opacity 0.28s ease, transform 0.28s ease;
+    z-index: 1;
+}
+.screen.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+    z-index: 10;
+}
+.screen.slide-back {
+    transform: translateX(-20px);
+}
+
+/* ============================================================
+   STATUS BAR (fake Android)
+============================================================ */
+.status-bar {
+    height: 28px;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    font-size: 11px;
+    color: var(--blanco);
+    flex-shrink: 0;
+    z-index: 20;
+}
+.status-bar-right { display:flex; align-items:center; gap:6px; }
+.status-bar svg { display:inline-block; vertical-align:middle; }
+
+/* ============================================================
+   SCROLLABLE
+============================================================ */
+.scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+.scroll::-webkit-scrollbar { display:none; }
+
+/* ============================================================
+   HEADER APP
+============================================================ */
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px 10px;
+    flex-shrink: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+}
+.app-header h1 { font-size:17px; font-weight:700; }
+.app-header .sub { font-size:12px; color:var(--gris); }
+.back-btn {
+    width:36px; height:36px; border-radius:10px;
+    background:var(--bg3); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; color:var(--blanco);
+}
+
+/* ============================================================
+   BOTTOM NAV
+============================================================ */
+.bottom-nav {
+    display: flex;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    padding-bottom: var(--safe-bot);
+}
+.nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 10px 0 8px;
+    font-size: 10px;
+    color: var(--gris);
+    background: transparent;
+    transition: color 0.2s;
+}
+.nav-btn.active { color: var(--rojo); }
+.nav-btn svg { transition: transform 0.2s; }
+.nav-btn.active svg { transform: translateY(-1px); }
+
+/* ============================================================
+   LOGIN
+============================================================ */
+#screen-login {
+    background:
+        radial-gradient(circle at 20% 10%, rgba(196,15,15,0.22), transparent 50%),
+        radial-gradient(circle at 80% 90%, rgba(255,255,255,0.04), transparent 40%),
+        var(--bg);
+    justify-content: flex-end;
+}
+.login-top {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px 20px;
+    gap: 10px;
+}
+.login-logo { width:80px; height:80px; border-radius:22px; object-fit:contain; background:rgba(255,255,255,0.06); padding:10px; border:1px solid var(--border); }
+.login-brand { font-family:"RocknRoll One",sans-serif; font-size:22px; letter-spacing:0.04em; }
+.login-sub { font-size:13px; color:var(--gris); }
+.login-form {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-radius: 28px 28px 0 0;
+    padding: 28px 24px calc(28px + var(--safe-bot));
+    display: grid;
+    gap: 14px;
+}
+.login-form h2 { font-size:18px; margin-bottom:4px; }
+.login-form p { font-size:13px; color:var(--gris); }
+.field { display:grid; gap:6px; }
+.field label { font-size:12px; color:var(--gris2); text-transform:uppercase; letter-spacing:0.06em; }
+.field input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--rs);
+    padding: 13px 14px;
+    color: var(--blanco);
+    font-size:15px;
+    outline:none;
+    transition: border-color 0.2s;
+}
+.field input:focus { border-color:var(--border2); }
+.field input::placeholder { color:var(--gris); }
+.btn-primary {
+    background: var(--rojo);
+    color: #fff;
+    border-radius: var(--rs);
+    padding: 14px;
+    font-size:15px;
+    font-weight:600;
+    text-align:center;
+    transition: background-color 0.2s, transform 0.1s;
+    border:0;
+    width:100%;
+}
+.btn-primary:active { background:var(--rojo2); transform:scale(0.98); }
+.login-hint { text-align:center; font-size:12px; color:var(--gris); }
+
+/* ============================================================
+   HOME
+============================================================ */
+.greeting-bar {
+    padding: 16px 18px 12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-shrink:0;
+}
+.greeting-bar h2 { font-size:18px; }
+.greeting-bar p { font-size:12px; color:var(--gris); }
+.status-toggle {
+    display:flex; align-items:center; gap:8px;
+    background:var(--bg3); border:1px solid var(--border);
+    border-radius:999px; padding:6px 12px; font-size:12px;
+}
+.status-dot { width:8px; height:8px; border-radius:999px; }
+.status-dot.online { background:var(--verde); animation:pulse 2s infinite; }
+.status-dot.offline { background:var(--gris); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.home-stats {
+    padding: 0 18px 14px;
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;
+    flex-shrink:0;
+}
+.home-stat {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--r);
+    padding:12px;
+    display:grid; gap:3px;
+    text-align:center;
+}
+.home-stat .num { font-size:22px; font-weight:700; }
+.home-stat .lbl { font-size:10px; color:var(--gris); text-transform:uppercase; letter-spacing:0.05em; }
+
+.section-label {
+    padding: 0 18px 10px;
+    font-size:12px; color:var(--gris);
+    text-transform:uppercase; letter-spacing:0.08em;
+    flex-shrink:0;
+}
+
+.pedido-card {
+    margin: 0 18px 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    overflow:hidden;
+    transition: transform 0.15s, border-color 0.2s;
+    cursor:pointer;
+}
+.pedido-card:active { transform:scale(0.98); border-color:var(--border2); }
+.pedido-card-top {
+    padding: 14px;
+    display:flex; align-items:flex-start; justify-content:space-between; gap:8px;
+}
+.pedido-id { font-size:12px; color:var(--gris); }
+.pedido-nombre { font-size:15px; font-weight:600; margin-top:1px; }
+.pedido-dir { font-size:12px; color:var(--gris); margin-top:4px; display:flex; gap:4px; align-items:center; }
+.badge {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:3px 9px; border-radius:999px; font-size:11px; font-weight:600;
+}
+.badge::before { content:""; width:5px; height:5px; border-radius:999px; background:currentColor; }
+.b-pendiente { background:var(--amar-bg); color:var(--amarillo); border:1px solid rgba(245,158,11,0.3); }
+.b-camino    { background:var(--azul-bg);  color:var(--azul);    border:1px solid rgba(59,130,246,0.3); }
+.b-entregado { background:var(--verde-bg); color:var(--verde);   border:1px solid rgba(34,197,94,0.3); }
+.pedido-card-bot {
+    padding: 10px 14px;
+    border-top:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+}
+.pedido-total { font-size:14px; font-weight:600; }
+.pedido-tiempo { font-size:11px; color:var(--gris); display:flex; align-items:center; gap:4px; }
+.pedido-tiempo.alerta { color:var(--rojo); }
+.pedido-branch {
+    font-size:11px; padding:2px 8px; border-radius:6px;
+    background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--gris2);
+}
+
+/* sin pedidos */
+.empty-home {
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    padding:50px 24px; color:var(--gris); text-align:center;
+}
+.empty-home svg { opacity:0.25; }
+.empty-home p { font-size:14px; }
+
+/* ============================================================
+   DETALLE PEDIDO
+============================================================ */
+.order-hero {
+    padding:18px;
+    background: linear-gradient(135deg, rgba(196,15,15,0.15), transparent 70%);
+    border-bottom:1px solid var(--border);
+    display:grid; gap:10px;
+    flex-shrink:0;
+}
+.order-hero-top { display:flex; align-items:center; justify-content:space-between; }
+.order-hero h2 { font-size:22px; }
+.order-hero-sub { font-size:13px; color:var(--gris); }
+
+.order-section {
+    margin:14px 18px 0;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--r);
+    overflow:hidden;
+}
+.order-section-header {
+    padding:11px 14px;
+    border-bottom:1px solid var(--border);
+    font-size:12px; color:var(--gris);
+    text-transform:uppercase; letter-spacing:0.07em;
+    display:flex; align-items:center; gap:7px;
+}
+.order-section-body { padding:14px; }
+
+.cliente-row { display:flex; align-items:center; gap:12px; }
+.cliente-avatar {
+    width:44px; height:44px; border-radius:999px;
+    background:linear-gradient(135deg,#1e1e1e,#2e2e2e);
+    border:2px solid var(--border2);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:700; flex-shrink:0;
+}
+.cliente-info { flex:1; }
+.cliente-info strong { font-size:15px; display:block; }
+.cliente-info span { font-size:12px; color:var(--gris); }
+.contact-btns { display:flex; gap:8px; margin-top:12px; }
+.btn-contact {
+    flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+    padding:10px; border-radius:var(--rs); font-size:13px; font-weight:500;
+    transition:all 0.15s;
+}
+.btn-contact:active { transform:scale(0.96); }
+.btn-contact.whatsapp { background:rgba(37,211,102,0.15); border:1px solid rgba(37,211,102,0.35); color:#25d366; }
+.btn-contact.llamar   { background:var(--azul-bg); border:1px solid rgba(59,130,246,0.35); color:var(--azul); }
+
+.dir-row { display:grid; gap:6px; }
+.dir-row strong { font-size:14px; }
+.dir-row span { font-size:12px; color:var(--gris); }
+.btn-mapa {
+    margin-top:10px; width:100%; display:flex; align-items:center; justify-content:center; gap:7px;
+    padding:11px; border-radius:var(--rs);
+    background:var(--azul-bg); border:1px solid rgba(59,130,246,0.35); color:var(--azul);
+    font-size:13px; font-weight:500;
+    transition:all 0.15s;
+}
+.btn-mapa:active { transform:scale(0.98); }
+
+.item-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:14px;
+}
+.item-row:last-child { border-bottom:0; }
+.item-row-q { font-size:12px; color:var(--gris); margin-right:6px; }
+.item-row-price { color:var(--gris); font-size:13px; }
+.total-row { display:flex; justify-content:space-between; align-items:center; padding-top:10px; border-top:1px solid var(--border2); margin-top:4px; }
+.total-row span { font-size:14px; color:var(--gris); }
+.total-row strong { font-size:18px; }
+
+.pago-badge {
+    display:inline-flex; align-items:center; gap:5px; padding:5px 10px;
+    border-radius:8px; font-size:12px;
+}
+.pago-efectivo { background:var(--verde-bg); border:1px solid rgba(34,197,94,0.3); color:var(--verde); }
+.pago-online   { background:var(--azul-bg);  border:1px solid rgba(59,130,246,0.3); color:var(--azul); }
+
+.action-bar {
+    padding:14px 18px calc(14px + var(--safe-bot));
+    display:grid; gap:8px;
+    border-top:1px solid var(--border);
+    background:var(--bg);
+    flex-shrink:0;
+}
+.btn-secondary {
+    background:var(--bg3); border:1px solid var(--border2);
+    color:var(--blanco); border-radius:var(--rs); padding:13px;
+    font-size:14px; font-weight:500; text-align:center;
+    transition:all 0.15s; width:100%;
+}
+.btn-secondary:active { background:var(--bg2); transform:scale(0.98); }
+.btn-entregado { background:var(--verde); border-color:var(--verde); color:#fff; border-radius:var(--rs); padding:14px; font-size:15px; font-weight:700; text-align:center; width:100%; transition:all 0.15s; }
+.btn-entregado:active { opacity:0.85; transform:scale(0.98); }
+
+/* ============================================================
+   MAPA / EN RUTA
+============================================================ */
+.map-container {
+    flex:1;
+    background:
+        radial-gradient(circle at 30% 40%, rgba(59,130,246,0.07), transparent 50%),
+        radial-gradient(circle at 70% 60%, rgba(196,15,15,0.06), transparent 50%),
+        #0a0a0a;
+    position:relative;
+    overflow:hidden;
+}
+.map-grid-bg {
+    position:absolute; inset:0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 36px 36px;
+}
+.map-pin-big {
+    position:absolute;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+}
+.pin-circle {
+    width:18px; height:18px; border-radius:999px;
+    border:3px solid #fff;
+    box-shadow:0 0 0 6px rgba(255,255,255,0.1);
+}
+.pin-label {
+    font-size:11px; padding:3px 8px; border-radius:5px;
+    background:rgba(0,0,0,0.85); border:1px solid var(--border2);
+    white-space:nowrap;
+}
+.map-route-svg { position:absolute; inset:0; pointer-events:none; }
+.map-overlay-top {
+    position:absolute; top:0; left:0; right:0;
+    padding:14px; display:flex; gap:8px;
+}
+.map-info-pill {
+    background:rgba(0,0,0,0.85); border:1px solid var(--border2);
+    border-radius:999px; padding:7px 12px;
+    display:flex; align-items:center; gap:6px; font-size:12px;
+}
+.map-overlay-bot {
+    position:absolute; bottom:0; left:0; right:0;
+    padding:14px;
+}
+.map-dest-card {
+    background:rgba(10,10,10,0.95); border:1px solid var(--border2);
+    border-radius:var(--r); padding:14px;
+    display:grid; gap:8px;
+    backdrop-filter:blur(10px);
+}
+.map-dest-card h3 { font-size:14px; }
+.map-dest-card p { font-size:12px; color:var(--gris); }
+
+/* ============================================================
+   HISTORIAL
+============================================================ */
+.hist-item {
+    margin: 0 18px 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px;
+    display:flex; align-items:center; gap:12px;
+}
+.hist-icon {
+    width:38px; height:38px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.hist-icon.ent { background:var(--verde-bg); color:var(--verde); border:1px solid rgba(34,197,94,0.3); }
+.hist-icon.can { background:rgba(239,68,68,0.12); color:#ef4444; border:1px solid rgba(239,68,68,0.3); }
+.hist-info { flex:1; }
+.hist-info strong { font-size:14px; display:block; }
+.hist-info span { font-size:12px; color:var(--gris); }
+.hist-total { font-size:14px; font-weight:600; }
+
+.earning-card {
+    margin: 18px 18px 0;
+    background: linear-gradient(135deg, var(--rojo-glow), rgba(255,255,255,0.03));
+    border: 1px solid rgba(196,15,15,0.3);
+    border-radius: var(--r);
+    padding: 18px;
+    display:grid; gap:4px;
+}
+.earning-card .num { font-size:32px; font-weight:700; }
+.earning-card .lbl { font-size:12px; color:var(--gris); }
+.earning-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 18px 18px; }
+.earning-mini {
+    background:var(--card); border:1px solid var(--border); border-radius:var(--rs);
+    padding:12px; display:grid; gap:2px;
+}
+.earning-mini strong { font-size:16px; }
+.earning-mini span { font-size:11px; color:var(--gris); }
+
+/* ============================================================
+   PERFIL
+============================================================ */
+.profile-hero {
+    padding: 24px 18px 18px;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    background: radial-gradient(circle at 50% 0%, rgba(196,15,15,0.18), transparent 60%);
+    border-bottom:1px solid var(--border);
+    flex-shrink:0;
+}
+.profile-avatar {
+    width:80px; height:80px; border-radius:999px;
+    background: linear-gradient(135deg, var(--rojo2), #350303);
+    border: 3px solid rgba(196,15,15,0.5);
+    display:flex; align-items:center; justify-content:center;
+    font-size:28px; font-weight:700;
+}
+.profile-name { font-size:20px; font-weight:700; }
+.profile-sub { font-size:13px; color:var(--gris); }
+.profile-stats { display:flex; gap:24px; margin-top:4px; }
+.profile-stat { text-align:center; }
+.profile-stat strong { display:block; font-size:18px; }
+.profile-stat span { font-size:11px; color:var(--gris); }
+
+.menu-list { padding:14px 18px; display:grid; gap:8px; }
+.menu-item {
+    display:flex; align-items:center; gap:12px;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--rs); padding:14px;
+    transition:border-color 0.2s;
+    cursor:pointer;
+}
+.menu-item:active { border-color:var(--border2); }
+.menu-item-icon {
+    width:36px; height:36px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.06); flex-shrink:0;
+}
+.menu-item-text { flex:1; }
+.menu-item-text strong { font-size:14px; display:block; }
+.menu-item-text span { font-size:12px; color:var(--gris); }
+.menu-item-arrow { color:var(--gris); }
+.menu-item.danger { border-color:rgba(239,68,68,0.2); }
+.menu-item.danger .menu-item-icon { background:rgba(239,68,68,0.1); color:#ef4444; }
+.menu-item.danger .menu-item-text strong { color:#ef4444; }
+
+/* ============================================================
+   CONFIRMACIÓN ENTREGA
+============================================================ */
+.confirm-screen {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    flex:1; padding:32px 24px; gap:16px; text-align:center;
+}
+.confirm-icon {
+    width:90px; height:90px; border-radius:999px;
+    background:var(--verde-bg); border:2px solid rgba(34,197,94,0.4);
+    display:flex; align-items:center; justify-content:center;
+    animation:pop 0.4s ease;
+}
+@keyframes pop { 0%{transform:scale(0.5);opacity:0} 80%{transform:scale(1.08)} 100%{transform:scale(1);opacity:1} }
+.confirm-screen h2 { font-size:24px; }
+.confirm-screen p { font-size:14px; color:var(--gris); max-width:28ch; }
+
+/* ============================================================
+   TOAST
+============================================================ */
+.toast {
+    position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:rgba(20,20,20,0.95); border:1px solid var(--border2);
+    border-radius:999px; padding:10px 18px; font-size:13px;
+    opacity:0; pointer-events:none; z-index:999; white-space:nowrap;
+    transition:all 0.3s; backdrop-filter:blur(10px);
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ============================================================
+   ONLINE TOGGLE
+============================================================ */
+.toggle-switch {
+    width:40px; height:22px; background:var(--gris); border-radius:999px; position:relative;
+    transition:background 0.3s; flex-shrink:0;
+}
+.toggle-switch.on { background:var(--verde); }
+.toggle-knob {
+    position:absolute; top:3px; left:3px; width:16px; height:16px;
+    border-radius:999px; background:#fff; transition:transform 0.3s;
+    box-shadow:0 1px 4px rgba(0,0,0,0.4);
+}
+.toggle-switch.on .toggle-knob { transform:translateX(18px); }
+
+/* Fade para el splash */
+.splash {
+    position:fixed; inset:0; background:var(--bg); z-index:999;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+    animation: splashOut 0.4s ease 1.6s forwards;
+}
+@keyframes splashOut { to { opacity:0; pointer-events:none; } }
+.splash img { width:72px; border-radius:18px; }
+.splash-brand { font-family:"RocknRoll One",sans-serif; font-size:20px; }
+.splash-sub { font-size:12px; color:var(--gris); }
+.splash-loader { width:40px; height:3px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; margin-top:8px; }
+.splash-loader-bar { height:100%; background:var(--rojo); border-radius:2px; animation:load 1.6s ease forwards; }
+@keyframes load { from{width:0} to{width:100%} }
+    </style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="splash">
+    <img src="../img/logo.png" alt="Logo">
+    <div class="splash-brand">Yushijiro</div>
+    <div class="splash-sub">App Repartidores</div>
+    <div class="splash-loader"><div class="splash-loader-bar"></div></div>
+</div>
+
+<div id="app">
+
+<!-- ============================================================
+     LOGIN
+============================================================ -->
+<div class="screen active" id="screen-login">
+    <div style="height:28px;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:11px;flex-shrink:0">
+        <span id="clock-login">12:00</span>
+        <div style="display:flex;gap:6px;align-items:center">
+            <svg width="14" height="10" viewBox="0 0 24 17" fill="white"><path d="M12 0C7.4 0 3.3 1.9 0.3 5l2.1 2.1C4.8 4.7 8.2 3 12 3s7.2 1.7 9.6 4.1L23.7 5C20.7 1.9 16.6 0 12 0zm0 6c-3.1 0-5.9 1.3-7.9 3.3l2.1 2.1C7.7 10.1 9.8 9 12 9s4.3 1.1 5.8 2.4l2.1-2.1C17.9 7.3 15.1 6 12 6zm0 6c-1.7 0-3.2.7-4.3 1.8L12 18l4.3-4.2C15.2 12.7 13.7 12 12 12z"/></svg>
+            <svg width="16" height="10" viewBox="0 0 25 12" fill="white"><rect x="0" y="1" width="22" height="10" rx="2" stroke="white" stroke-width="1.5" fill="none"/><rect x="23" y="4" width="2" height="4" rx="1" fill="white" opacity="0.6"/><rect x="1.5" y="2.5" width="17" height="7" rx="1" fill="white"/></svg>
+        </div>
+    </div>
+    <div class="login-top">
+        <img class="login-logo" src="../img/logo.png" alt="Logo">
+        <div class="login-brand">Yushijiro</div>
+        <div class="login-sub">Portal de Repartidores</div>
+    </div>
+    <div class="login-form">
+        <div>
+            <h2>Iniciar sesión</h2>
+            <p>Accede con tus credenciales</p>
+        </div>
+        <div class="field">
+            <label>Usuario</label>
+            <input type="text" id="inp-user" placeholder="ej. carlos.m" autocomplete="off">
+        </div>
+        <div class="field">
+            <label>Contraseña</label>
+            <input type="password" id="inp-pass" placeholder="••••••••">
+        </div>
+        <button class="btn-primary" id="btn-login">Entrar</button>
+        <div class="login-hint">¿Olvidaste tu contraseña? Habla con tu supervisor.</div>
+    </div>
+</div>
+
+<!-- ============================================================
+     HOME
+============================================================ -->
+<div class="screen" id="screen-home">
+    <div class="status-bar">
+        <span id="clock-home">12:00</span>
+        <div class="status-bar-right">
+            <svg width="14" height="10" viewBox="0 0 24 17" fill="white"><path d="M12 0C7.4 0 3.3 1.9 0.3 5l2.1 2.1C4.8 4.7 8.2 3 12 3s7.2 1.7 9.6 4.1L23.7 5C20.7 1.9 16.6 0 12 0zm0 6c-3.1 0-5.9 1.3-7.9 3.3l2.1 2.1C7.7 10.1 9.8 9 12 9s4.3 1.1 5.8 2.4l2.1-2.1C17.9 7.3 15.1 6 12 6zm0 6c-1.7 0-3.2.7-4.3 1.8L12 18l4.3-4.2C15.2 12.7 13.7 12 12 12z"/></svg>
+            <svg width="16" height="10" viewBox="0 0 25 12" fill="white"><rect x="0" y="1" width="22" height="10" rx="2" stroke="white" stroke-width="1.5" fill="none"/><rect x="23" y="4" width="2" height="4" rx="1" fill="white" opacity="0.6"/><rect x="1.5" y="2.5" width="17" height="7" rx="1" fill="white"/></svg>
+        </div>
+    </div>
+
+    <div class="greeting-bar">
+        <div>
+            <h2 id="greeting-name">Hola, Carlos</h2>
+            <p id="greeting-branch">Sucursal Hacienda</p>
+        </div>
+        <button class="status-toggle" id="toggle-online" onclick="toggleOnline()">
+            <span class="status-dot online" id="status-dot"></span>
+            <span id="status-label">En línea</span>
+            <div class="toggle-switch on" id="toggle-sw"><div class="toggle-knob"></div></div>
+        </button>
+    </div>
+
+    <div class="home-stats">
+        <div class="home-stat">
+            <div class="num" id="stat-pendientes">2</div>
+            <div class="lbl">Pendientes</div>
+        </div>
+        <div class="home-stat">
+            <div class="num" id="stat-entregados">5</div>
+            <div class="lbl">Entregados</div>
+        </div>
+        <div class="home-stat">
+            <div class="num">$1,240</div>
+            <div class="lbl">Recaudado</div>
+        </div>
+    </div>
+
+    <div class="section-label">Pedidos asignados</div>
+
+    <div class="scroll" id="home-list"></div>
+
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="showTab('home')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Inicio
+        </button>
+        <button class="nav-btn" onclick="showTab('historial')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Historial
+        </button>
+        <button class="nav-btn" onclick="showTab('perfil')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+            Perfil
+        </button>
+    </nav>
+</div>
+
+<!-- ============================================================
+     DETALLE PEDIDO
+============================================================ -->
+<div class="screen" id="screen-pedido">
+    <div class="status-bar">
+        <span id="clock-ped">12:00</span>
+        <div class="status-bar-right">
+            <svg width="14" height="10" viewBox="0 0 24 17" fill="white"><path d="M12 0C7.4 0 3.3 1.9 0.3 5l2.1 2.1C4.8 4.7 8.2 3 12 3s7.2 1.7 9.6 4.1L23.7 5C20.7 1.9 16.6 0 12 0zm0 6c-3.1 0-5.9 1.3-7.9 3.3l2.1 2.1C7.7 10.1 9.8 9 12 9s4.3 1.1 5.8 2.4l2.1-2.1C17.9 7.3 15.1 6 12 6zm0 6c-1.7 0-3.2.7-4.3 1.8L12 18l4.3-4.2C15.2 12.7 13.7 12 12 12z"/></svg>
+        </div>
+    </div>
+    <div class="app-header">
+        <button class="back-btn" onclick="goBack()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div style="flex:1;text-align:center">
+            <div class="app-header" style="border:0;padding:0;display:block;text-align:center">
+                <h1 id="ped-id-title">#1042</h1>
+                <div class="sub" id="ped-branch-title">Hacienda</div>
+            </div>
+        </div>
+        <div style="width:36px"></div>
+    </div>
+
+    <div class="scroll">
+        <div class="order-hero">
+            <div class="order-hero-top">
+                <div>
+                    <div class="order-hero-sub">Estado del pedido</div>
+                    <h2 id="ped-status-title">Pendiente</h2>
+                </div>
+                <span class="badge b-pendiente" id="ped-badge">Pendiente</span>
+            </div>
+        </div>
+
+        <!-- CLIENTE -->
+        <div class="order-section">
+            <div class="order-section-header">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+                Cliente
+            </div>
+            <div class="order-section-body">
+                <div class="cliente-row">
+                    <div class="cliente-avatar" id="ped-avatar">MG</div>
+                    <div class="cliente-info">
+                        <strong id="ped-cliente">María González</strong>
+                        <span id="ped-tel">55 1234 5678</span>
+                    </div>
+                </div>
+                <div class="contact-btns">
+                    <button class="btn-contact whatsapp" id="btn-wa">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                        WhatsApp
+                    </button>
+                    <button class="btn-contact llamar" id="btn-tel">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"/></svg>
+                        Llamar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIRECCIÓN -->
+        <div class="order-section">
+            <div class="order-section-header">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Dirección de entrega
+            </div>
+            <div class="order-section-body">
+                <div class="dir-row">
+                    <strong id="ped-dir">Av. Insurgentes 340, Col. Roma</strong>
+                    <span id="ped-ref">Entre calles Orizaba y Durango</span>
+                </div>
+                <button class="btn-mapa" onclick="goTo('screen-mapa')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+                    Ver en mapa / Iniciar ruta
+                </button>
+            </div>
+        </div>
+
+        <!-- ITEMS -->
+        <div class="order-section">
+            <div class="order-section-header">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                Resumen del pedido
+            </div>
+            <div class="order-section-body">
+                <div id="ped-items"></div>
+                <div class="total-row">
+                    <span>Total</span>
+                    <strong id="ped-total">$270</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGO -->
+        <div class="order-section" style="margin-bottom:14px">
+            <div class="order-section-header">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                Método de pago
+            </div>
+            <div class="order-section-body">
+                <span class="pago-badge pago-efectivo" id="ped-pago">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+                    Efectivo al recibir
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-bar" id="ped-actions">
+        <button class="btn-secondary" onclick="goBack()">Cancelar pedido</button>
+        <button class="btn-entregado" onclick="confirmarEntrega()">✓ Confirmar entrega</button>
+    </div>
+</div>
+
+<!-- ============================================================
+     MAPA / EN RUTA
+============================================================ -->
+<div class="screen" id="screen-mapa">
+    <div class="status-bar">
+        <span id="clock-mapa">12:00</span>
+        <div class="status-bar-right"></div>
+    </div>
+    <div class="app-header" style="position:absolute;top:28px;left:0;right:0;z-index:10;background:transparent;border:0">
+        <button class="back-btn" onclick="goBack()" style="background:rgba(0,0,0,0.7);backdrop-filter:blur(8px)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div style="flex:1"></div>
+    </div>
+    <div class="map-container">
+        <div class="map-grid-bg"></div>
+
+        <!-- Sucursal origen -->
+        <div class="map-pin-big" style="top:30%;left:35%">
+            <div class="pin-circle" style="background:#f97316"></div>
+            <div class="pin-label">Hacienda (origen)</div>
+        </div>
+        <!-- Destino -->
+        <div class="map-pin-big" style="top:62%;left:65%">
+            <div class="pin-circle" style="background:var(--rojo);animation:pingMap 1.5s infinite"></div>
+            <div class="pin-label" style="color:#f87171;border-color:rgba(239,68,68,0.5)">Destino</div>
+        </div>
+        <!-- Repartidor -->
+        <div class="map-pin-big" style="top:48%;left:52%;z-index:5">
+            <div class="pin-circle" style="background:var(--verde);width:22px;height:22px;box-shadow:0 0 0 8px rgba(34,197,94,0.15)"></div>
+            <div class="pin-label" style="color:var(--verde);border-color:rgba(34,197,94,0.4);background:rgba(0,0,0,0.9)">Tú</div>
+        </div>
+
+        <svg class="map-route-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d="M35,30 Q45,40 52,48" stroke="#22c55e" stroke-width="0.8" fill="none" stroke-dasharray="3,2" opacity="0.8"/>
+            <path d="M52,48 Q58,55 65,62" stroke="#22c55e" stroke-width="0.8" fill="none" stroke-dasharray="3,2" opacity="0.5"/>
+        </svg>
+
+        <div class="map-overlay-top">
+            <div class="map-info-pill">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span style="color:var(--verde)">~12 min</span>
+            </div>
+            <div class="map-info-pill">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><polyline points="8 17 3 12 8 7"/></svg>
+                2.4 km
+            </div>
+        </div>
+
+        <div class="map-overlay-bot">
+            <div class="map-dest-card">
+                <h3 id="mapa-dir">Av. Insurgentes 340, Col. Roma</h3>
+                <p id="mapa-cliente">Cliente: María González · 55 1234 5678</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+                    <button class="btn-contact llamar" style="font-size:12px;padding:9px">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"/></svg>
+                        Llamar
+                    </button>
+                    <button class="btn-entregado" style="font-size:12px;padding:9px" onclick="confirmarEntrega()">✓ Entregado</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     HISTORIAL
+============================================================ -->
+<div class="screen" id="screen-historial">
+    <div class="status-bar">
+        <span id="clock-hist">12:00</span>
+        <div class="status-bar-right"></div>
+    </div>
+    <div class="app-header">
+        <div>
+            <h1>Historial</h1>
+            <div class="sub">Turno de hoy</div>
+        </div>
+    </div>
+    <div class="scroll">
+        <div class="earning-card">
+            <div class="lbl">Total recaudado hoy</div>
+            <div class="num">$1,240</div>
+        </div>
+        <div class="earning-grid">
+            <div class="earning-mini">
+                <strong>5</strong>
+                <span>Entregados</span>
+            </div>
+            <div class="earning-mini">
+                <strong>1</strong>
+                <span>Cancelados</span>
+            </div>
+            <div class="earning-mini">
+                <strong>~22 min</strong>
+                <span>Tiempo prom.</span>
+            </div>
+            <div class="earning-mini">
+                <strong>98%</strong>
+                <span>Efectividad</span>
+            </div>
+        </div>
+
+        <div class="section-label" style="padding-top:4px">Pedidos del turno</div>
+
+        <div class="hist-item">
+            <div class="hist-icon ent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="hist-info">
+                <strong>#1038 · María G.</strong>
+                <span>Hacienda · hace 1h 20min</span>
+            </div>
+            <div class="hist-total">$270</div>
+        </div>
+        <div class="hist-item">
+            <div class="hist-icon ent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="hist-info">
+                <strong>#1035 · Diego M.</strong>
+                <span>Hacienda · hace 2h</span>
+            </div>
+            <div class="hist-total">$425</div>
+        </div>
+        <div class="hist-item">
+            <div class="hist-icon ent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="hist-info">
+                <strong>#1031 · Sofía L.</strong>
+                <span>Hacienda · hace 2h 45min</span>
+            </div>
+            <div class="hist-total">$160</div>
+        </div>
+        <div class="hist-item">
+            <div class="hist-icon ent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="hist-info">
+                <strong>#1028 · Carlos V.</strong>
+                <span>Hacienda · hace 3h 10min</span>
+            </div>
+            <div class="hist-total">$295</div>
+        </div>
+        <div class="hist-item">
+            <div class="hist-icon can"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+            <div class="hist-info">
+                <strong>#1025 · Luis R.</strong>
+                <span>Hacienda · hace 3h 40min · Cancelado</span>
+            </div>
+            <div class="hist-total" style="color:var(--gris)">$0</div>
+        </div>
+        <div class="hist-item">
+            <div class="hist-icon ent"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="hist-info">
+                <strong>#1022 · Valeria C.</strong>
+                <span>Hacienda · hace 4h 15min</span>
+            </div>
+            <div class="hist-total">$90</div>
+        </div>
+        <div style="height:24px"></div>
+    </div>
+    <nav class="bottom-nav">
+        <button class="nav-btn" onclick="showTab('home')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Inicio
+        </button>
+        <button class="nav-btn active" onclick="showTab('historial')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Historial
+        </button>
+        <button class="nav-btn" onclick="showTab('perfil')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+            Perfil
+        </button>
+    </nav>
+</div>
+
+<!-- ============================================================
+     PERFIL
+============================================================ -->
+<div class="screen" id="screen-perfil">
+    <div class="status-bar">
+        <span id="clock-perf">12:00</span>
+        <div class="status-bar-right"></div>
+    </div>
+    <div class="scroll">
+        <div class="profile-hero">
+            <div class="profile-avatar" id="perf-avatar">CM</div>
+            <div class="profile-name" id="perf-name">Carlos Martínez</div>
+            <div class="profile-sub" id="perf-branch">Repartidor · Hacienda</div>
+            <div class="profile-stats">
+                <div class="profile-stat"><strong>148</strong><span>Entregas</span></div>
+                <div class="profile-stat"><strong>99%</strong><span>Efect.</span></div>
+                <div class="profile-stat"><strong>4.9★</strong><span>Rating</span></div>
+            </div>
+        </div>
+
+        <div class="menu-list">
+            <div style="font-size:12px;color:var(--gris);text-transform:uppercase;letter-spacing:0.07em;padding:4px 0 2px">Mi cuenta</div>
+            <div class="menu-item">
+                <div class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg></div>
+                <div class="menu-item-text"><strong>Mis datos</strong><span>Nombre, teléfono, vehículo</span></div>
+                <span class="menu-item-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+            </div>
+            <div class="menu-item">
+                <div class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+                <div class="menu-item-text"><strong>Mis ganancias</strong><span>Historial semanal y mensual</span></div>
+                <span class="menu-item-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+            </div>
+            <div class="menu-item">
+                <div class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+                <div class="menu-item-text"><strong>Notificaciones</strong><span>Alertas de nuevos pedidos</span></div>
+                <span class="menu-item-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+            </div>
+
+            <div style="font-size:12px;color:var(--gris);text-transform:uppercase;letter-spacing:0.07em;padding:10px 0 2px">Soporte</div>
+            <div class="menu-item">
+                <div class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg></div>
+                <div class="menu-item-text"><strong>Ayuda</strong><span>Preguntas frecuentes</span></div>
+                <span class="menu-item-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+            </div>
+            <div class="menu-item">
+                <div class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+                <div class="menu-item-text"><strong>Contactar supervisor</strong><span>WhatsApp directo</span></div>
+                <span class="menu-item-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+            </div>
+
+            <div style="height:8px"></div>
+            <div class="menu-item danger" onclick="cerrarSesion()">
+                <div class="menu-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg></div>
+                <div class="menu-item-text"><strong>Cerrar sesión</strong></div>
+            </div>
+            <div style="height:24px"></div>
+        </div>
+    </div>
+    <nav class="bottom-nav">
+        <button class="nav-btn" onclick="showTab('home')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Inicio
+        </button>
+        <button class="nav-btn" onclick="showTab('historial')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Historial
+        </button>
+        <button class="nav-btn active" onclick="showTab('perfil')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+            Perfil
+        </button>
+    </nav>
+</div>
+
+<!-- ============================================================
+     CONFIRMACIÓN ENTREGA
+============================================================ -->
+<div class="screen" id="screen-confirm">
+    <div class="status-bar"><span id="clock-conf">12:00</span></div>
+    <div class="confirm-screen">
+        <div class="confirm-icon">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2>¡Entrega confirmada!</h2>
+        <p>El pedido <strong id="conf-id">#1042</strong> fue entregado exitosamente.</p>
+        <p id="conf-cliente" style="color:var(--gris);font-size:13px">María González</p>
+        <div style="width:100%;margin:10px 0;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:grid;gap:8px">
+            <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--gris)">Total cobrado</span><strong id="conf-total">$270</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--gris)">Sucursal</span><span id="conf-branch">Hacienda</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--gris)">Tiempo</span><span>~18 min</span></div>
+        </div>
+        <button class="btn-primary" style="margin-top:8px" onclick="volverHome()">Volver al inicio</button>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// DATOS
+// ============================================================
+const PEDIDOS = [
+    { id:"#1042", cliente:"María González", inicial:"MG", tel:"55 1234 5678", dir:"Av. Insurgentes 340, Col. Roma", ref:"Entre Orizaba y Durango", branch:"Hacienda", items:[{n:"Ramen Hakata",q:1,p:"$175"},{n:"Gyoza (6 pzs)",q:1,p:"$95"}], total:"$270", pago:"efectivo", status:"pendiente", min:3 },
+    { id:"#1048", cliente:"Valeria Cruz",   inicial:"VC", tel:"55 1111 9999", dir:"Av. Revolución 745, Col. Mixcoac", ref:"Frente al OXXO", branch:"Hacienda", items:[{n:"Rollo California",q:3,p:"$135"}], total:"$405", pago:"efectivo", status:"pendiente", min:8 },
+];
+
+let usuario = null;
+let pedidoActivo = null;
+let screenStack = [];
+let isOnline = true;
+
+// ============================================================
+// RELOJ
+// ============================================================
+function updateClocks() {
+    const t = new Date().toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});
+    document.querySelectorAll("[id^='clock-']").forEach(el => el.textContent = t);
+}
+setInterval(updateClocks, 1000);
+updateClocks();
+
+// ============================================================
+// NAVEGACIÓN
+// ============================================================
+function goTo(id, push = true) {
+    const current = document.querySelector(".screen.active");
+    if (current && push) {
+        screenStack.push(current.id);
+        current.classList.add("slide-back");
+        current.classList.remove("active");
+        setTimeout(() => current.classList.remove("slide-back"), 300);
+    }
+    const next = document.getElementById(id);
+    next.classList.add("active");
+}
+
+function goBack() {
+    if (!screenStack.length) return;
+    const prev = screenStack.pop();
+    const current = document.querySelector(".screen.active");
+    current.classList.remove("active");
+    document.getElementById(prev).classList.add("active");
+}
+
+function showTab(tab) {
+    const screens = { home:"screen-home", historial:"screen-historial", perfil:"screen-perfil" };
+    screenStack = [];
+    document.querySelectorAll(".screen.active").forEach(s => s.classList.remove("active"));
+    document.getElementById(screens[tab]).classList.add("active");
+}
+
+// ============================================================
+// LOGIN
+// ============================================================
+document.getElementById("btn-login").addEventListener("click", doLogin);
+document.getElementById("inp-pass").addEventListener("keydown", e => {
+    if (e.key === "Enter") doLogin();
+});
+
+async function doLogin() {
+    const u = document.getElementById("inp-user").value.trim().toLowerCase();
+    const p = document.getElementById("inp-pass").value;
+    if (!u || !p) { showToast("Ingresa usuario y contraseña"); return; }
+    const btn = document.getElementById("btn-login");
+    btn.disabled = true;
+    try {
+        const res  = await fetch("../api/login.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
+            body: JSON.stringify({ user: u, pass: p })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            usuario = data.user;
+            initHome();
+            goTo("screen-home");
+        } else {
+            showToast(data.error || "Error al iniciar sesión");
+            shake("btn-login");
+        }
+    } catch {
+        showToast("Error de conexión con el servidor");
+        shake("btn-login");
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function shake(id) {
+    const el = document.getElementById(id);
+    el.style.animation = "shake 0.4s ease";
+    el.addEventListener("animationend", () => el.style.animation = "", { once:true });
+}
+
+// ============================================================
+// HOME
+// ============================================================
+function initHome() {
+    document.getElementById("greeting-name").textContent = "Hola, " + usuario.nombre.split(" ")[0];
+    document.getElementById("greeting-branch").textContent = "Sucursal " + usuario.branch;
+    document.getElementById("perf-name").textContent = usuario.nombre;
+    document.getElementById("perf-avatar").textContent = usuario.inicial;
+    document.getElementById("perf-branch").textContent = "Repartidor · " + usuario.branch;
+    renderHome();
+}
+
+function renderHome() {
+    const activos = PEDIDOS.filter(p => p.status !== "entregado" && p.status !== "cancelado");
+    const entregados = PEDIDOS.filter(p => p.status === "entregado").length;
+    document.getElementById("stat-pendientes").textContent = activos.length;
+    document.getElementById("stat-entregados").textContent = entregados;
+
+    const list = document.getElementById("home-list");
+    if (!activos.length) {
+        list.innerHTML = `<div class="empty-home">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            <p>Sin pedidos asignados.<br>Espera nuevos envíos.</p>
+        </div>`;
+        return;
+    }
+    list.innerHTML = activos.map(p => `
+        <div class="pedido-card" onclick="abrirPedido('${p.id}')">
+            <div class="pedido-card-top">
+                <div>
+                    <div class="pedido-id">${p.id}</div>
+                    <div class="pedido-nombre">${p.cliente}</div>
+                    <div class="pedido-dir">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        ${p.dir}
+                    </div>
+                </div>
+                <span class="badge ${p.status==='en camino'?'b-camino':'b-pendiente'}">${p.status==='en camino'?'En camino':'Pendiente'}</span>
+            </div>
+            <div class="pedido-card-bot">
+                <div class="pedido-total">${p.total}</div>
+                <span class="pedido-branch">${p.branch}</span>
+                <div class="pedido-tiempo ${p.min >= 10 ? 'alerta' : ''}">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Hace ${p.min} min
+                </div>
+            </div>
+        </div>
+    `).join("") + "<div style='height:16px'></div>";
+}
+
+// ============================================================
+// DETALLE PEDIDO
+// ============================================================
+function abrirPedido(id) {
+    const p = PEDIDOS.find(x => x.id === id);
+    if (!p) return;
+    pedidoActivo = p;
+
+    document.getElementById("ped-id-title").textContent = p.id;
+    document.getElementById("ped-branch-title").textContent = p.branch;
+    document.getElementById("ped-avatar").textContent = p.inicial;
+    document.getElementById("ped-cliente").textContent = p.cliente;
+    document.getElementById("ped-tel").textContent = p.tel;
+    document.getElementById("ped-dir").textContent = p.dir;
+    document.getElementById("ped-ref").textContent = p.ref;
+    document.getElementById("ped-total").textContent = p.total;
+    document.getElementById("ped-status-title").textContent = p.status === "en camino" ? "En camino" : "Pendiente";
+
+    const badge = document.getElementById("ped-badge");
+    badge.className = "badge " + (p.status === "en camino" ? "b-camino" : "b-pendiente");
+    badge.textContent = p.status === "en camino" ? "En camino" : "Pendiente";
+
+    document.getElementById("ped-items").innerHTML = p.items.map(i =>
+        `<div class="item-row">
+            <span><span class="item-row-q">${i.q > 1 ? i.q+"× " : ""}</span>${i.n}</span>
+            <span class="item-row-price">${i.p}</span>
+        </div>`
+    ).join("");
+
+    document.getElementById("btn-wa").onclick = () => window.open(`https://wa.me/52${p.tel.replace(/\s/g,"")}?text=Hola%20${encodeURIComponent(p.cliente)},%20soy%20el%20repartidor%20de%20Yushijiro%20${p.branch}`);
+    document.getElementById("btn-tel").onclick = () => window.open(`tel:+52${p.tel.replace(/\s/g,"")}`);
+
+    // Mapa
+    document.getElementById("mapa-dir").textContent = p.dir;
+    document.getElementById("mapa-cliente").textContent = `Cliente: ${p.cliente} · ${p.tel}`;
+
+    goTo("screen-pedido");
+}
+
+// ============================================================
+// ACCIONES
+// ============================================================
+function confirmarEntrega() {
+    if (!pedidoActivo) return;
+    pedidoActivo.status = "entregado";
+
+    document.getElementById("conf-id").textContent = pedidoActivo.id;
+    document.getElementById("conf-cliente").textContent = pedidoActivo.cliente;
+    document.getElementById("conf-total").textContent = pedidoActivo.total;
+    document.getElementById("conf-branch").textContent = pedidoActivo.branch;
+
+    screenStack = ["screen-home"];
+    document.querySelectorAll(".screen.active").forEach(s => s.classList.remove("active"));
+    document.getElementById("screen-confirm").classList.add("active");
+    renderHome();
+}
+
+function volverHome() {
+    pedidoActivo = null;
+    screenStack = [];
+    document.querySelectorAll(".screen.active").forEach(s => s.classList.remove("active"));
+    document.getElementById("screen-home").classList.add("active");
+}
+
+function toggleOnline() {
+    isOnline = !isOnline;
+    const dot = document.getElementById("status-dot");
+    const label = document.getElementById("status-label");
+    const sw = document.getElementById("toggle-sw");
+    dot.className = "status-dot " + (isOnline ? "online" : "offline");
+    label.textContent = isOnline ? "En línea" : "Desconectado";
+    sw.classList.toggle("on", isOnline);
+    showToast(isOnline ? "Estás en línea" : "Te marcaste como desconectado");
+}
+
+async function cerrarSesion() {
+    await fetch("../api/logout.php", { method: "POST", credentials: "same-origin" }).catch(() => {});
+    usuario = null; pedidoActivo = null; screenStack = [];
+    document.getElementById("inp-user").value = "";
+    document.getElementById("inp-pass").value = "";
+    document.querySelectorAll(".screen.active").forEach(s => s.classList.remove("active"));
+    document.getElementById("screen-login").classList.add("active");
+    showToast("Sesión cerrada");
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimer;
+function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+// Shake CSS
+const style = document.createElement("style");
+style.textContent = `@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }`;
+document.head.appendChild(style);
+
+// Restaurar sesion si ya existe
+(async function() {
+    try {
+        const res = await fetch("../api/check.php", { credentials: "same-origin" });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.authenticated) { usuario = data.user; initHome(); goTo("screen-home"); }
+        }
+    } catch {}
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sucursal Tonanitla de Yushijiro San: menu, mapa, telefono y WhatsApp.">
+    <title>Yushijiro San | Sucursal Tonanitla</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/branch.css">
+    <link rel="shortcut icon" href="../img/logo.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Viaoda+Libre&family=RocknRoll+One&display=swap" rel="stylesheet">
+</head>
+<body class="sucursal-page">
+    <header id="header" class="site-header">
+        <nav class="main-nav" aria-label="Principal">
+            <ul>
+                <li><a href="../index.html#inicio">Inicio</a></li>
+                <li><a href="../index.html#menu">Menu</a></li>
+                <li><a href="../index.html#sucursales">Sucursales</a></li>
+                <li><a href="../index.html#contacto">Contacto</a></li>
+            </ul>
+        </nav>
+        <div class="logo">
+            <a href="../index.html#inicio" class="contlogo">
+                <img src="../img/logo.png" alt="Logo de Yushijiro San">
+            </a>
+        </div>
+        <div class="reserva">
+            <a href="https://wa.me/525525302967?text=Hola,%20quiero%20reservar%20en%20la%20sucursal%20Tonanitla." target="_blank" rel="noopener">Reserva por WhatsApp</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="branch-hero reveal">
+            <img src="../img/galeria2.jpg" alt="Sucursal Tonanitla de Yushijiro">
+            <div class="branch-hero-text">
+                <p class="etiqueta">Sucursal</p>
+                <h1>Tonanitla</h1>
+                <p>Disfruta tus rollos favoritos y nuestro menu especial para Tonanitla con atencion rapida.</p>
+            </div>
+        </section>
+
+        <section class="branch-contenido reveal">
+            <div class="branch-card">
+                <h2>Informacion de la sucursal</h2>
+                <p><strong>Horario:</strong> Lun - Dom, 1:00 pm a 10:00 pm</p>
+                <p><strong>Telefono:</strong> 55 5932 2152</p>
+                <p><strong>Menu:</strong> <a class="link-menu-pdf" href="../pdf/menu-tonanitla.pdf" target="_blank" rel="noopener">Ver PDF de Tonanitla</a></p>
+                <div class="branch-actions">
+                    <a class="btn-sucursal" href="https://wa.me/525525302967?text=Hola,%20quiero%20reservar%20en%20la%20sucursal%20Tonanitla." target="_blank" rel="noopener">WhatsApp</a>
+                    <a class="btn-sucursal secundaria" href="https://maps.google.com/?q=Yushijiro%20Tonanitla" target="_blank" rel="noopener">Como llegar</a>
+                    <a class="btn-sucursal terciaria" href="tel:+525559322152">Llamar</a>
+                </div>
+            </div>
+            <div class="branch-card mapa">
+                <h2>Ubicacion</h2>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4622.298375338619!2d-99.053921!3d19.689853199999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d1f3006cc7538b%3A0xf8cf6e293fbe7e73!2sYushijiro%20Sushi%20Tonanitla!5e1!3m2!1ses-419!2smx!4v1751927540200!5m2!1ses-419!2smx"
+                    loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa de sucursal Tonanitla"></iframe>
+            </div>
+        </section>
+
+        <section class="branch-narrativa reveal">
+            <p class="kicker">Tonanitla vibra rapido</p>
+            <h2>Sabor contundente, servicio agil y una energia que engancha desde la primera visita.</h2>
+            <div class="branch-narrativa-grid">
+                <article class="branch-text-block">
+                    <h3>Perfecta para antojo inmediato</h3>
+                    <p>Cuando quieres comer rico sin esperar demasiado, esta sede mantiene tiempos cortos sin perder calidad.</p>
+                </article>
+                <article class="branch-text-block">
+                    <h3>Menu pensado para volver</h3>
+                    <p>Tonanitla tiene su propio menu y una combinacion de opciones que invita a probar algo distinto cada vez.</p>
+                </article>
+            </div>
+            <blockquote class="branch-copy-quote">"Rapida, sabrosa y consistente: asi se gana una sucursal favorita."</blockquote>
+            <div class="branch-mini-grid">
+                <article class="branch-mini-card">
+                    <h3>Ideal para</h3>
+                    <p>Comidas entre semana y plan casual.</p>
+                </article>
+                <article class="branch-mini-card">
+                    <h3>Recomendado</h3>
+                    <p>Rollos clasicos y especialidades de casa.</p>
+                </article>
+                <article class="branch-mini-card">
+                    <h3>Tip local</h3>
+                    <p>Revisa su PDF exclusivo antes de pedir.</p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Yushijiro San - Sucursal Tonanitla</p>
+    </footer>
+
+    <script>
+        const header = document.querySelector("#header");
+        const revealItems = document.querySelectorAll(".reveal");
+        window.addEventListener("scroll", () => header.classList.toggle("fondohead", window.scrollY > 0));
+        const revealOnScroll = () => revealItems.forEach(item => {
+            if (item.getBoundingClientRect().top < window.innerHeight * 0.9) item.classList.add("visible");
+        });
+        window.addEventListener("scroll", revealOnScroll);
+        window.addEventListener("load", revealOnScroll);
+    </script>
+</body>
+</html>

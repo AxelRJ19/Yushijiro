@@ -1,0 +1,15 @@
+# Configuracion sensible - nunca en git
+config.php
+users.php
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# Media pesada (descomenta si quieres excluirla - recomendado Git LFS)
+# /pdf/*.pdf
+# /img/galeria*.jpg
+# /img/plato.jpg
+# /vid/*.mp4

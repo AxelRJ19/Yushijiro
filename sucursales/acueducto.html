@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sucursal Acueducto de Yushijiro San: menu, mapa, telefono y WhatsApp.">
+    <title>Yushijiro San | Sucursal Acueducto</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/branch.css">
+    <link rel="shortcut icon" href="../img/logo.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Viaoda+Libre&family=RocknRoll+One&display=swap" rel="stylesheet">
+</head>
+<body class="sucursal-page">
+    <header id="header" class="site-header">
+        <nav class="main-nav" aria-label="Principal">
+            <ul>
+                <li><a href="../index.html#inicio">Inicio</a></li>
+                <li><a href="../index.html#menu">Menu</a></li>
+                <li><a href="../index.html#sucursales">Sucursales</a></li>
+                <li><a href="../index.html#contacto">Contacto</a></li>
+            </ul>
+        </nav>
+        <div class="logo">
+            <a href="../index.html#inicio" class="contlogo">
+                <img src="../img/logo.png" alt="Logo de Yushijiro San">
+            </a>
+        </div>
+        <div class="reserva">
+            <a href="https://wa.me/525549051932?text=Hola,%20quiero%20reservar%20en%20la%20sucursal%20Acueducto." target="_blank" rel="noopener">Reserva por WhatsApp</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="branch-hero reveal">
+            <img src="../img/galeria5.jpg" alt="Sucursal Acueducto de Yushijiro">
+            <div class="branch-hero-text">
+                <p class="etiqueta">Sucursal</p>
+                <h1>Acueducto</h1>
+                <p>Descubre una experiencia completa de sabor japones con servicio cercano y rapido.</p>
+            </div>
+        </section>
+
+        <section class="branch-contenido reveal">
+            <div class="branch-card">
+                <h2>Informacion de la sucursal</h2>
+                <p><strong>Horario:</strong> Lun - Dom, 1:00 pm a 10:00 pm</p>
+                <p><strong>Telefono:</strong> 55 5932 1553</p>
+                <p><strong>Menu:</strong> <a class="link-menu-pdf" href="../pdf/menu-yushijiro.pdf" target="_blank" rel="noopener">Ver PDF de Acueducto</a></p>
+                <div class="branch-actions">
+                    <a class="btn-sucursal" href="https://wa.me/525549051932?text=Hola,%20quiero%20reservar%20en%20la%20sucursal%20Acueducto." target="_blank" rel="noopener">WhatsApp</a>
+                    <a class="btn-sucursal secundaria" href="https://maps.google.com/?q=Yushijiro%20Acueducto" target="_blank" rel="noopener">Como llegar</a>
+                    <a class="btn-sucursal terciaria" href="tel:+525559321553">Llamar</a>
+                </div>
+            </div>
+            <div class="branch-card mapa">
+                <h2>Ubicacion</h2>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4622.550860067242!2d-99.0297384!3d19.6811056!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d1f3a80da3d491%3A0x63cdfd9bc68e333!2sYushijiro%20Acueducto!5e1!3m2!1ses-419!2smx!4v1751927562977!5m2!1ses-419!2smx"
+                    loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa de sucursal Acueducto"></iframe>
+            </div>
+        </section>
+
+        <section class="branch-narrativa reveal">
+            <p class="kicker">Acueducto tiene caracter</p>
+            <h2>Una sucursal para quienes buscan sabor intenso, ambiente comodo y una experiencia redonda.</h2>
+            <div class="branch-narrativa-grid">
+                <article class="branch-text-block">
+                    <h3>Comer bien, sin complicaciones</h3>
+                    <p>Desde una comida espontanea hasta una salida en grupo, Acueducto mantiene balance entre rapidez y detalle.</p>
+                </article>
+                <article class="branch-text-block">
+                    <h3>Calidad constante</h3>
+                    <p>La cocina cuida temperatura, textura y presentacion para que cada plato llegue como debe llegar.</p>
+                </article>
+            </div>
+            <blockquote class="branch-copy-quote">"Acueducto no solo cumple: sorprende y te deja con ganas de volver."</blockquote>
+            <div class="branch-mini-grid">
+                <article class="branch-mini-card">
+                    <h3>Ideal para</h3>
+                    <p>Reuniones de amigos y cenas familiares.</p>
+                </article>
+                <article class="branch-mini-card">
+                    <h3>Recomendado</h3>
+                    <p>Entradas calientes y combinaciones de sushi.</p>
+                </article>
+                <article class="branch-mini-card">
+                    <h3>Tip local</h3>
+                    <p>Pide sugerencias del dia por WhatsApp.</p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Yushijiro San - Sucursal Acueducto</p>
+    </footer>
+
+    <script>
+        const header = document.querySelector("#header");
+        const revealItems = document.querySelectorAll(".reveal");
+        window.addEventListener("scroll", () => header.classList.toggle("fondohead", window.scrollY > 0));
+        const revealOnScroll = () => revealItems.forEach(item => {
+            if (item.getBoundingClientRect().top < window.innerHeight * 0.9) item.classList.add("visible");
+        });
+        window.addEventListener("scroll", revealOnScroll);
+        window.addEventListener("load", revealOnScroll);
+    </script>
+</body>
+</html>

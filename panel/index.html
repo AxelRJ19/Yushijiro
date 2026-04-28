@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Envíos | Yushijiro San</title>
+    <link rel="stylesheet" href="css/panel.css">
+    <link rel="shortcut icon" href="../img/logo.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Viaoda+Libre&family=RocknRoll+One&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <img src="../img/logo.png" alt="Logo Yushijiro">
+        <div class="sidebar-brand-text">
+            <strong>Yushijiro</strong>
+            <span>Panel de Envíos</span>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <span class="nav-label">Principal</span>
+        <a href="#" class="nav-item active">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            Dashboard
+        </a>
+        <a href="#pedidos" class="nav-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            Pedidos
+            <span class="nav-badge" id="badge-total">8</span>
+        </a>
+        <a href="#mapa" class="nav-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+            Mapa en Vivo
+        </a>
+        <a href="#repartidores" class="nav-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+            Repartidores
+        </a>
+
+        <span class="nav-label" style="margin-top:8px">Sucursales</span>
+        <a href="#" class="nav-item">
+            <span style="width:10px;height:10px;border-radius:999px;background:#f97316;flex-shrink:0"></span>
+            Hacienda
+        </a>
+        <a href="#" class="nav-item">
+            <span style="width:10px;height:10px;border-radius:999px;background:#8b5cf6;flex-shrink:0"></span>
+            Tonanitla
+        </a>
+        <a href="#" class="nav-item">
+            <span style="width:10px;height:10px;border-radius:999px;background:#06b6d4;flex-shrink:0"></span>
+            Acueducto
+        </a>
+
+        <span class="nav-label" style="margin-top:8px">Sistema</span>
+        <a href="#" class="nav-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Historial
+        </a>
+        <a href="#" class="nav-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+            Configuración
+        </a>
+        <a href="../index.html" class="nav-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Ir al Sitio
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="sidebar-user">
+            <div class="avatar">AD</div>
+            <div class="sidebar-user-info">
+                <strong>Admin</strong>
+                <span>Supervisor</span>
+            </div>
+        </div>
+        <button onclick="cerrarSesionPanel()" style="width:100%;padding:9px 12px;margin-top:10px;background:rgba(196,15,15,0.12);border:1px solid rgba(196,15,15,0.2);border-radius:8px;color:#ff6b6b;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center;font-family:inherit;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            Cerrar sesion
+        </button>
+    </div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <div>
+                <div class="topbar-title">Panel de Envíos</div>
+                <div class="topbar-sub" id="fecha-hora">Cargando...</div>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="live-badge">
+                <span class="live-dot"></span>
+                En vivo
+            </div>
+            <div class="topbar-search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Buscar pedido o cliente..." id="search-input">
+            </div>
+            <button class="btn-icon notif" title="Notificaciones">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+                <span class="notif-dot"></span>
+            </button>
+            <button class="btn-icon" title="Actualizar" id="btn-refresh">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <!-- STATS -->
+        <div class="stats-grid">
+            <div class="stat-card s-pendiente">
+                <div class="stat-top">
+                    <div class="stat-icon ic-pendiente">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <span class="stat-delta">hoy</span>
+                </div>
+                <div class="stat-num" id="count-pendiente">0</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+            <div class="stat-card s-camino">
+                <div class="stat-top">
+                    <div class="stat-icon ic-camino">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                    </div>
+                    <span class="stat-delta">activos</span>
+                </div>
+                <div class="stat-num" id="count-camino">0</div>
+                <div class="stat-label">En camino</div>
+            </div>
+            <div class="stat-card s-entregado">
+                <div class="stat-top">
+                    <div class="stat-icon ic-entregado">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <span class="stat-delta up">↑ 12%</span>
+                </div>
+                <div class="stat-num" id="count-entregado">0</div>
+                <div class="stat-label">Entregados</div>
+            </div>
+            <div class="stat-card s-cancelado">
+                <div class="stat-top">
+                    <div class="stat-icon ic-cancelado">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    </div>
+                    <span class="stat-delta down">↓ 3%</span>
+                </div>
+                <div class="stat-num" id="count-cancelado">0</div>
+                <div class="stat-label">Cancelados</div>
+            </div>
+        </div>
+
+        <!-- RESUMEN SUCURSALES -->
+        <div>
+            <div class="section-header" style="margin-bottom:12px">
+                <div>
+                    <div class="section-title">Resumen por sucursal</div>
+                    <div class="section-sub">Pedidos activos en este turno</div>
+                </div>
+            </div>
+            <div class="branch-summary" id="branch-summary"></div>
+        </div>
+
+        <!-- PEDIDOS -->
+        <div id="pedidos">
+            <div class="section-header" style="margin-bottom:14px">
+                <div>
+                    <div class="section-title">Pedidos activos</div>
+                    <div class="section-sub" id="orders-count-label">—</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                    <div class="tabs">
+                        <button class="tab active" data-branch="todos">
+                            <span class="tab-dot" style="background:#888"></span>Todas
+                        </button>
+                        <button class="tab" data-branch="Hacienda">
+                            <span class="tab-dot" style="background:#f97316"></span>Hacienda
+                        </button>
+                        <button class="tab" data-branch="Tonanitla">
+                            <span class="tab-dot" style="background:#8b5cf6"></span>Tonanitla
+                        </button>
+                        <button class="tab" data-branch="Acueducto">
+                            <span class="tab-dot" style="background:#06b6d4"></span>Acueducto
+                        </button>
+                    </div>
+                    <div class="filters-row">
+                        <button class="filter-btn active" data-status="todos">Todos</button>
+                        <button class="filter-btn" data-status="pendiente">Pendiente</button>
+                        <button class="filter-btn" data-status="en camino">En camino</button>
+                        <button class="filter-btn" data-status="entregado">Entregado</button>
+                        <button class="filter-btn" data-status="cancelado">Cancelado</button>
+                    </div>
+                </div>
+            </div>
+            <div class="orders-grid" id="orders-grid"></div>
+        </div>
+
+        <!-- MAPA + REPARTIDORES -->
+        <div class="bottom-grid" id="mapa">
+            <div class="panel-card">
+                <div class="panel-card-header">
+                    <h3>Mapa en vivo</h3>
+                    <div class="live-badge" style="font-size:0.7rem;padding:3px 8px">
+                        <span class="live-dot"></span>Rastreando
+                    </div>
+                </div>
+                <div class="map-placeholder">
+                    <div class="map-grid"></div>
+
+                    <!-- Pines sucursales -->
+                    <div class="map-pin hacienda" style="top:40%;left:55%">
+                        <div class="map-pin-dot"></div>
+                        <span class="map-pin-label">Hacienda</span>
+                    </div>
+                    <div class="map-pin tonanitla" style="top:25%;left:30%">
+                        <div class="map-pin-dot"></div>
+                        <span class="map-pin-label">Tonanitla</span>
+                    </div>
+                    <div class="map-pin acueducto" style="top:60%;left:70%">
+                        <div class="map-pin-dot"></div>
+                        <span class="map-pin-label">Acueducto</span>
+                    </div>
+
+                    <!-- Pines repartidores -->
+                    <div class="map-pin repartidor" style="top:35%;left:62%">
+                        <div class="map-pin-dot"></div>
+                        <span class="map-pin-label" style="background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.4);color:#22c55e">Carlos M.</span>
+                    </div>
+                    <div class="map-pin repartidor" style="top:50%;left:42%">
+                        <div class="map-pin-dot"></div>
+                        <span class="map-pin-label" style="background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.4);color:#22c55e">Héctor R.</span>
+                    </div>
+
+                    <!-- SVG rutas -->
+                    <svg class="map-route" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <path d="M55,40 Q58,37 62,35" stroke="#22c55e" stroke-width="0.5" fill="none" stroke-dasharray="2,2" opacity="0.6"/>
+                        <path d="M30,25 Q36,30 42,50" stroke="#22c55e" stroke-width="0.5" fill="none" stroke-dasharray="2,2" opacity="0.6"/>
+                    </svg>
+                </div>
+                <div style="padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:16px;flex-wrap:wrap">
+                    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--gris)">
+                        <span style="display:block;width:10px;height:10px;border-radius:999px;background:#f97316"></span> Hacienda
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--gris)">
+                        <span style="display:block;width:10px;height:10px;border-radius:999px;background:#8b5cf6"></span> Tonanitla
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:0.75px;color:var(--gris)">
+                        <span style="display:block;width:10px;height:10px;border-radius:999px;background:#06b6d4;font-size:0.75rem"></span> Acueducto
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--gris);margin-left:auto">
+                        <span style="display:block;width:10px;height:2px;background:#22c55e;border-radius:1px"></span> Ruta activa
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPARTIDORES -->
+            <div class="panel-card" id="repartidores">
+                <div class="panel-card-header">
+                    <h3>Repartidores</h3>
+                    <span style="font-size:0.74rem;color:var(--gris)" id="rep-disponibles">—</span>
+                </div>
+                <div class="panel-card-body">
+                    <div class="repartidor-list" id="rep-list"></div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// ===== DATOS =====
+const PEDIDOS = [
+    { id:"#1042", cliente:"María González", tel:"55 1234 5678", dir:"Av. Insurgentes 340, Col. Roma", branch:"Hacienda", items:[{n:"Ramen Hakata",q:1,p:"$175"},{n:"Gyoza (6 pzs)",q:1,p:"$95"}], total:"$270", status:"pendiente", min:3, rep:null },
+    { id:"#1043", cliente:"Jorge Reyes", tel:"55 9876 5432", dir:"Calle Morelos 12, Col. Centro", branch:"Tonanitla", items:[{n:"Rollo Dragón",q:2,p:"$160"},{n:"Edamame",q:1,p:"$65"},{n:"Agua fresca",q:2,p:"$40"}], total:"$425", status:"en camino", min:18, rep:"Carlos M." },
+    { id:"#1044", cliente:"Andrea López", tel:"55 5555 1212", dir:"Calz. del Hueso 890, Col. Pedregal", branch:"Acueducto", items:[{n:"Sushi 20 pzs",q:1,p:"$390"},{n:"Miso Soup",q:1,p:"$55"}], total:"$445", status:"pendiente", min:7, rep:null },
+    { id:"#1045", cliente:"Luis Martínez", tel:"55 4444 3333", dir:"Insurgentes Sur 1600, Col. Florida", branch:"Hacienda", items:[{n:"Takoyaki",q:1,p:"$120"},{n:"Rollo Spicy Tuna",q:1,p:"$175"}], total:"$295", status:"entregado", min:45, rep:"Héctor R." },
+    { id:"#1046", cliente:"Sofía Ramírez", tel:"55 2222 7777", dir:"Av. Universidad 2014, Copilco", branch:"Tonanitla", items:[{n:"Ramen Vegano",q:1,p:"$160"}], total:"$160", status:"en camino", min:22, rep:"Héctor R." },
+    { id:"#1047", cliente:"Carlos Vega", tel:"55 6666 8888", dir:"Calle Atlixco 9, Col. Hipódromo", branch:"Acueducto", items:[{n:"Combo Sushi 12 pzs",q:1,p:"$280"},{n:"Sake frío",q:1,p:"$120"}], total:"$400", status:"cancelado", min:0, rep:null },
+    { id:"#1048", cliente:"Valeria Cruz", tel:"55 1111 9999", dir:"Av. Revolución 745, Col. Mixcoac", branch:"Hacienda", items:[{n:"Rollo California",q:3,p:"$135"}], total:"$405", status:"pendiente", min:2, rep:null },
+    { id:"#1049", cliente:"Diego Morales", tel:"55 3333 6666", dir:"Eje Central Lázaro Cárdenas 820", branch:"Acueducto", items:[{n:"Chirashi Don",q:1,p:"$230"},{n:"Gyoza (6 pzs)",q:2,p:"$95"},{n:"Cerveza Japonesa",q:2,p:"$80"}], total:"$480", status:"entregado", min:38, rep:"Carlos M." },
+];
+
+const REPARTIDORES = [
+    { nombre:"Carlos M.", inicial:"CM", tel:"55 0001 1111", status:"ocupado", pedido:"#1043" },
+    { nombre:"Héctor R.", inicial:"HR", tel:"55 0002 2222", status:"ocupado", pedido:"#1046" },
+    { nombre:"Paola S.", inicial:"PS", tel:"55 0003 3333", status:"libre", pedido:null },
+    { nombre:"Miguel T.", inicial:"MT", tel:"55 0004 4444", status:"inactivo", pedido:null },
+];
+
+const BRANCH_COLORS = { Hacienda:"#f97316", Tonanitla:"#8b5cf6", Acueducto:"#06b6d4" };
+
+// ===== ESTADO =====
+let filtroSucursal = "todos";
+let filtroStatus   = "todos";
+let searchQ = "";
+
+// ===== RELOJ =====
+function updateClock() {
+    const now = new Date();
+    document.getElementById("fecha-hora").textContent =
+        now.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"}) + " — " +
+        now.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ===== STATS =====
+function renderStats() {
+    const cnt = s => PEDIDOS.filter(p => p.status === s).length;
+    document.getElementById("count-pendiente").textContent = cnt("pendiente");
+    document.getElementById("count-camino").textContent    = cnt("en camino");
+    document.getElementById("count-entregado").textContent = cnt("entregado");
+    document.getElementById("count-cancelado").textContent = cnt("cancelado");
+    document.getElementById("badge-total").textContent = cnt("pendiente") + cnt("en camino");
+}
+
+// ===== BRANCH SUMMARY =====
+function renderBranchSummary() {
+    const branches = ["Hacienda","Tonanitla","Acueducto"];
+    const el = document.getElementById("branch-summary");
+    el.innerHTML = branches.map(b => {
+        const pedidos = PEDIDOS.filter(p => p.branch === b);
+        const pend = pedidos.filter(p => p.status === "pendiente").length;
+        const cam  = pedidos.filter(p => p.status === "en camino").length;
+        const ent  = pedidos.filter(p => p.status === "entregado").length;
+        return `<div class="branch-summary-card">
+            <div class="bsc-top">
+                <span class="bsc-dot" style="background:${BRANCH_COLORS[b]}"></span>
+                <span class="bsc-name">${b}</span>
+            </div>
+            <div class="bsc-stats">
+                <div class="bsc-stat"><span>Pendientes</span><span>${pend}</span></div>
+                <div class="bsc-stat"><span>En camino</span><span>${cam}</span></div>
+                <div class="bsc-stat"><span>Entregados</span><span>${ent}</span></div>
+                <div class="bsc-stat"><span>Total pedidos</span><span>${pedidos.length}</span></div>
+            </div>
+        </div>`;
+    }).join("");
+}
+
+// ===== ORDERS =====
+function statusClass(s) {
+    return { "pendiente":"sb-pendiente","en camino":"sb-camino","entregado":"sb-entregado","cancelado":"sb-cancelado" }[s] || "";
+}
+function statusLabel(s) {
+    return { "pendiente":"Pendiente","en camino":"En camino","entregado":"Entregado","cancelado":"Cancelado" }[s] || s;
+}
+function timeLabel(p) {
+    if (p.status === "entregado") return `Entregado en ~${p.min} min`;
+    if (p.status === "cancelado") return "Cancelado";
+    return `Hace ${p.min} min`;
+}
+function timeUrgent(p) {
+    return p.status === "pendiente" && p.min >= 10;
+}
+
+function renderOrders() {
+    let list = PEDIDOS.filter(p => {
+        const bOk = filtroSucursal === "todos" || p.branch === filtroSucursal;
+        const sOk = filtroStatus === "todos" || p.status === filtroStatus;
+        const qOk = !searchQ || p.cliente.toLowerCase().includes(searchQ) || p.id.includes(searchQ);
+        return bOk && sOk && qOk;
+    });
+
+    document.getElementById("orders-count-label").textContent = `${list.length} pedido${list.length !== 1 ? "s" : ""} encontrado${list.length !== 1 ? "s" : ""}`;
+
+    const grid = document.getElementById("orders-grid");
+    if (!list.length) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            <p>Sin pedidos con estos filtros</p>
+        </div>`;
+        return;
+    }
+
+    grid.innerHTML = list.map(p => `
+        <div class="order-card" data-id="${p.id}">
+            <div class="order-card-top">
+                <div class="order-num"><div>${p.id}</div><strong>${p.cliente}</strong></div>
+                <span class="status-badge ${statusClass(p.status)}">${statusLabel(p.status)}</span>
+            </div>
+
+            <div class="order-customer">
+                <span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    ${p.dir}
+                </span>
+            </div>
+
+            <div class="order-branch-badge">
+                <span class="branch-dot ${p.branch === "Hacienda" ? "bd-hacienda" : p.branch === "Tonanitla" ? "bd-tonanitla" : "bd-acueducto"}"></span>
+                ${p.branch}
+                ${p.rep ? `<span style="color:var(--gris);margin-left:4px">· ${p.rep}</span>` : ""}
+            </div>
+
+            <div class="order-items">
+                ${p.items.map(i => `
+                    <div class="order-item-row">
+                        <span>${i.q > 1 ? i.q + "× " : ""}${i.n}</span>
+                        <span>${i.p}</span>
+                    </div>`).join("")}
+            </div>
+
+            <div class="order-footer">
+                <div class="order-total">Total: <strong>${p.total}</strong></div>
+                <div class="order-time ${timeUrgent(p) ? "urgent" : ""}">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    ${timeLabel(p)}
+                </div>
+            </div>
+
+            ${p.status === "pendiente" ? `
+            <div class="order-actions">
+                <button class="btn-order" onclick="cambiarStatus('${p.id}','cancelado')">Cancelar</button>
+                <button class="btn-order primary" onclick="cambiarStatus('${p.id}','en camino')">Enviar</button>
+            </div>` : ""}
+            ${p.status === "en camino" ? `
+            <div class="order-actions">
+                <button class="btn-order" onclick="cambiarStatus('${p.id}','cancelado')">Cancelar</button>
+                <button class="btn-order primary" onclick="cambiarStatus('${p.id}','entregado')">Confirmar entrega</button>
+            </div>` : ""}
+        </div>
+    `).join("");
+}
+
+// ===== REPARTIDORES =====
+function renderRepartidores() {
+    const libres = REPARTIDORES.filter(r => r.status === "libre").length;
+    document.getElementById("rep-disponibles").textContent = `${libres} disponible${libres !== 1 ? "s" : ""}`;
+    document.getElementById("rep-list").innerHTML = REPARTIDORES.map(r => `
+        <div class="repartidor-item">
+            <div class="rep-avatar ${r.status}">${r.inicial}</div>
+            <div class="rep-info">
+                <strong>${r.nombre}</strong>
+                <span>${r.pedido ? "Pedido " + r.pedido : r.status === "libre" ? "Sin pedido asignado" : "Desconectado"}</span>
+            </div>
+            <span class="rep-status ${r.status}">${r.status === "libre" ? "Libre" : r.status === "ocupado" ? "Ocupado" : "Inactivo"}</span>
+        </div>
+    `).join("");
+}
+
+// ===== ACCIONES =====
+function cambiarStatus(id, nuevoStatus) {
+    const p = PEDIDOS.find(x => x.id === id);
+    if (!p) return;
+    p.status = nuevoStatus;
+    if (nuevoStatus === "en camino") {
+        const libre = REPARTIDORES.find(r => r.status === "libre");
+        if (libre) { libre.status = "ocupado"; libre.pedido = id; p.rep = libre.nombre; }
+    }
+    if (nuevoStatus === "entregado" || nuevoStatus === "cancelado") {
+        const rep = REPARTIDORES.find(r => r.nombre === p.rep);
+        if (rep) { rep.status = "libre"; rep.pedido = null; }
+    }
+    renderAll();
+}
+
+// ===== TABS & FILTERS =====
+document.querySelectorAll(".tab").forEach(t => {
+    t.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+        t.classList.add("active");
+        filtroSucursal = t.dataset.branch;
+        renderOrders();
+    });
+});
+document.querySelectorAll(".filter-btn").forEach(b => {
+    b.addEventListener("click", () => {
+        document.querySelectorAll(".filter-btn").forEach(x => x.classList.remove("active"));
+        b.classList.add("active");
+        filtroStatus = b.dataset.status;
+        renderOrders();
+    });
+});
+document.getElementById("search-input").addEventListener("input", e => {
+    searchQ = e.target.value.toLowerCase().trim();
+    renderOrders();
+});
+document.getElementById("btn-refresh").addEventListener("click", () => {
+    renderAll();
+    const btn = document.getElementById("btn-refresh");
+    btn.style.transform = "rotate(360deg)";
+    btn.style.transition = "transform 0.5s";
+    setTimeout(() => { btn.style.transform = ""; btn.style.transition = ""; }, 500);
+});
+
+// ===== RENDER ALL =====
+function renderAll() {
+    renderStats();
+    renderBranchSummary();
+    renderOrders();
+    renderRepartidores();
+}
+
+renderAll();
+
+// Verificar autenticacion al cargar
+(async function() {
+    try {
+        const r = await fetch('../api/panel-check.php', { credentials: 'same-origin' });
+        if (!r.ok) window.location.replace('login.html');
+    } catch { window.location.replace('login.html'); }
+})();
+
+async function cerrarSesionPanel() {
+    await fetch('../api/panel-logout.php', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
+    window.location.replace('login.html');
+}
+</script>
+</body>
+</html>
