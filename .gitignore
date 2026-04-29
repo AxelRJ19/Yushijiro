@@ -1,6 +1,8 @@
 # Configuracion sensible - nunca en git
 config.php
 users.php
+api/db-config.php
+yushijiro.sql
 
 # Archivos de sistema
 .DS_Store
