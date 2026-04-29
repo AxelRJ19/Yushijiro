@@ -821,8 +821,8 @@ input, textarea { font-family:inherit; }
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 Método de pago
             </div>
-            <div class="order-section-body">
-                <span class="pago-badge pago-efectivo" id="ped-pago">
+            <div class="order-section-body" id="ped-pago-body">
+                <span class="pago-badge pago-efectivo">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
                     Efectivo al recibir
                 </span>
@@ -1109,10 +1109,7 @@ input, textarea { font-family:inherit; }
 // ============================================================
 // DATOS
 // ============================================================
-const PEDIDOS = [
-    { id:"#1042", cliente:"María González", inicial:"MG", tel:"55 1234 5678", dir:"Av. Insurgentes 340, Col. Roma", ref:"Entre Orizaba y Durango", branch:"Hacienda", items:[{n:"Ramen Hakata",q:1,p:"$175"},{n:"Gyoza (6 pzs)",q:1,p:"$95"}], total:"$270", pago:"efectivo", status:"pendiente", min:3 },
-    { id:"#1048", cliente:"Valeria Cruz",   inicial:"VC", tel:"55 1111 9999", dir:"Av. Revolución 745, Col. Mixcoac", ref:"Frente al OXXO", branch:"Hacienda", items:[{n:"Rollo California",q:3,p:"$135"}], total:"$405", pago:"efectivo", status:"pendiente", min:8 },
-];
+let PEDIDOS = [];  // se llena desde la API
 
 let usuario = null;
 let pedidoActivo = null;
@@ -1157,6 +1154,8 @@ function showTab(tab) {
     screenStack = [];
     document.querySelectorAll(".screen.active").forEach(s => s.classList.remove("active"));
     document.getElementById(screens[tab]).classList.add("active");
+    if (tab === "home") startPolling();
+    else stopPolling();
 }
 
 // ============================================================
@@ -1204,15 +1203,56 @@ function shake(id) {
 }
 
 // ============================================================
+// CARGA PEDIDOS DESDE API
+// ============================================================
+async function loadPedidos() {
+    try {
+        const res  = await fetch("../api/driver-orders.php", { credentials:"same-origin" });
+        const data = await res.json();
+        if (!data.ok) return;
+        PEDIDOS = data.orders.map(o => ({
+            id:       '#' + String(o.id).padStart(4,'0'),
+            _id:      o.id,
+            cliente:  o.customer_name,
+            inicial:  o.customer_name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(),
+            tel:      o.customer_phone,
+            dir:      o.customer_address,
+            ref:      '',
+            branch:   o.branch_name,
+            branch_id:o.branch_id,
+            items:    (o.items||[]).map(i=>({ n:i.name, q:i.quantity, p:'$'+Number(i.unit_price).toFixed(0) })),
+            total:    '$' + Number(o.total).toFixed(0),
+            _total:   Number(o.total),
+            pago:     o.payment_method === 'cash' ? 'efectivo' : 'tarjeta',
+            cambio:   o.change_amount ? '$' + Number(o.change_amount).toFixed(0) : null,
+            cash_received: o.cash_received ? '$' + Number(o.cash_received).toFixed(0) : null,
+            status:   o.status === 'assigned' ? 'pendiente' : 'en camino',
+            _status:  o.status,
+            min:      Math.floor((Date.now() - new Date(o.created_at).getTime()) / 60000),
+        }));
+        renderHome();
+    } catch(e) {
+        console.error('Error cargando pedidos:', e);
+    }
+}
+
+// Polling cada 15 segundos cuando el repartidor está en home
+let pedidosInterval = null;
+function startPolling()  { if (!pedidosInterval) pedidosInterval = setInterval(loadPedidos, 15000); }
+function stopPolling()   { clearInterval(pedidosInterval); pedidosInterval = null; }
+
+// ============================================================
 // HOME
 // ============================================================
 function initHome() {
+    const branchLabel = usuario.branch_name || usuario.branch;
     document.getElementById("greeting-name").textContent = "Hola, " + usuario.nombre.split(" ")[0];
-    document.getElementById("greeting-branch").textContent = "Sucursal " + usuario.branch;
+    document.getElementById("greeting-branch").textContent = "Sucursal " + branchLabel;
     document.getElementById("perf-name").textContent = usuario.nombre;
     document.getElementById("perf-avatar").textContent = usuario.inicial;
-    document.getElementById("perf-branch").textContent = "Repartidor · " + usuario.branch;
-    renderHome();
+    document.getElementById("perf-branch").textContent = "Repartidor · " + branchLabel;
+    loadPedidos();
+    startPolling();
 }
 
 function renderHome() {
@@ -1290,15 +1330,86 @@ function abrirPedido(id) {
     document.getElementById("mapa-dir").textContent = p.dir;
     document.getElementById("mapa-cliente").textContent = `Cliente: ${p.cliente} · ${p.tel}`;
 
+    renderPagoBody(p);
+    renderPedidoActions();
     goTo("screen-pedido");
 }
 
 // ============================================================
 // ACCIONES
 // ============================================================
-function confirmarEntrega() {
+function renderPagoBody(p) {
+    const body = document.getElementById("ped-pago-body");
+    if (p.pago === "efectivo") {
+        let html = `<span class="pago-badge pago-efectivo">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+            Efectivo al recibir
+        </span>`;
+        if (p.cash_received && p.cambio) {
+            html += `<div style="margin-top:12px;display:grid;gap:8px">
+                <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--gris)">Recibe</span><strong>${p.cash_received}</strong></div>
+                <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--gris)">Cambio a dar</span><strong style="color:var(--amarillo)">${p.cambio}</strong></div>
+            </div>`;
+        }
+        body.innerHTML = html;
+    } else {
+        body.innerHTML = `<span class="pago-badge pago-online">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Pago con tarjeta
+        </span>`;
+    }
+}
+
+function renderPedidoActions() {
+    const p = pedidoActivo;
+    const bar = document.getElementById("ped-actions");
+    if (p._status === "assigned") {
+        bar.innerHTML = `
+            <button class="btn-secondary" onclick="marcarEnCamino()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Marcar en camino
+            </button>
+            <button class="btn-entregado" onclick="confirmarEntrega()">✓ Confirmar entrega</button>`;
+    } else {
+        bar.innerHTML = `<button class="btn-entregado" onclick="confirmarEntrega()">✓ Confirmar entrega</button>`;
+    }
+}
+
+async function marcarEnCamino() {
     if (!pedidoActivo) return;
-    pedidoActivo.status = "entregado";
+    try {
+        const res = await fetch("../api/update-status.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
+            body: JSON.stringify({ order_id: pedidoActivo._id, status: "on_way" })
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.error || "Error al actualizar"); return; }
+    } catch { showToast("Error de conexión"); return; }
+
+    pedidoActivo._status = "on_way";
+    pedidoActivo.status = "en camino";
+    const badge = document.getElementById("ped-badge");
+    badge.className = "badge b-camino";
+    badge.textContent = "En camino";
+    document.getElementById("ped-status-title").textContent = "En camino";
+    renderPedidoActions();
+    showToast("¡Marcado en camino!");
+}
+
+async function confirmarEntrega() {
+    if (!pedidoActivo) return;
+    try {
+        const res = await fetch("../api/update-status.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
+            body: JSON.stringify({ order_id: pedidoActivo._id, status: "delivered" })
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.error || "Error al confirmar"); return; }
+    } catch { showToast("Error de conexión"); return; }
 
     document.getElementById("conf-id").textContent = pedidoActivo.id;
     document.getElementById("conf-cliente").textContent = pedidoActivo.cliente;
@@ -1308,7 +1419,7 @@ function confirmarEntrega() {
     screenStack = ["screen-home"];
     document.querySelectorAll(".screen.active").forEach(s => s.classList.remove("active"));
     document.getElementById("screen-confirm").classList.add("active");
-    renderHome();
+    loadPedidos();
 }
 
 function volverHome() {
@@ -1316,6 +1427,7 @@ function volverHome() {
     screenStack = [];
     document.querySelectorAll(".screen.active").forEach(s => s.classList.remove("active"));
     document.getElementById("screen-home").classList.add("active");
+    startPolling();
 }
 
 function toggleOnline() {
@@ -1330,6 +1442,7 @@ function toggleOnline() {
 }
 
 async function cerrarSesion() {
+    stopPolling();
     await fetch("../api/logout.php", { method: "POST", credentials: "same-origin" }).catch(() => {});
     usuario = null; pedidoActivo = null; screenStack = [];
     document.getElementById("inp-user").value = "";

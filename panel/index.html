@@ -282,31 +282,71 @@
 </div><!-- /main -->
 
 <script>
-// ===== DATOS =====
-const PEDIDOS = [
-    { id:"#1042", cliente:"María González", tel:"55 1234 5678", dir:"Av. Insurgentes 340, Col. Roma", branch:"Hacienda", items:[{n:"Ramen Hakata",q:1,p:"$175"},{n:"Gyoza (6 pzs)",q:1,p:"$95"}], total:"$270", status:"pendiente", min:3, rep:null },
-    { id:"#1043", cliente:"Jorge Reyes", tel:"55 9876 5432", dir:"Calle Morelos 12, Col. Centro", branch:"Tonanitla", items:[{n:"Rollo Dragón",q:2,p:"$160"},{n:"Edamame",q:1,p:"$65"},{n:"Agua fresca",q:2,p:"$40"}], total:"$425", status:"en camino", min:18, rep:"Carlos M." },
-    { id:"#1044", cliente:"Andrea López", tel:"55 5555 1212", dir:"Calz. del Hueso 890, Col. Pedregal", branch:"Acueducto", items:[{n:"Sushi 20 pzs",q:1,p:"$390"},{n:"Miso Soup",q:1,p:"$55"}], total:"$445", status:"pendiente", min:7, rep:null },
-    { id:"#1045", cliente:"Luis Martínez", tel:"55 4444 3333", dir:"Insurgentes Sur 1600, Col. Florida", branch:"Hacienda", items:[{n:"Takoyaki",q:1,p:"$120"},{n:"Rollo Spicy Tuna",q:1,p:"$175"}], total:"$295", status:"entregado", min:45, rep:"Héctor R." },
-    { id:"#1046", cliente:"Sofía Ramírez", tel:"55 2222 7777", dir:"Av. Universidad 2014, Copilco", branch:"Tonanitla", items:[{n:"Ramen Vegano",q:1,p:"$160"}], total:"$160", status:"en camino", min:22, rep:"Héctor R." },
-    { id:"#1047", cliente:"Carlos Vega", tel:"55 6666 8888", dir:"Calle Atlixco 9, Col. Hipódromo", branch:"Acueducto", items:[{n:"Combo Sushi 12 pzs",q:1,p:"$280"},{n:"Sake frío",q:1,p:"$120"}], total:"$400", status:"cancelado", min:0, rep:null },
-    { id:"#1048", cliente:"Valeria Cruz", tel:"55 1111 9999", dir:"Av. Revolución 745, Col. Mixcoac", branch:"Hacienda", items:[{n:"Rollo California",q:3,p:"$135"}], total:"$405", status:"pendiente", min:2, rep:null },
-    { id:"#1049", cliente:"Diego Morales", tel:"55 3333 6666", dir:"Eje Central Lázaro Cárdenas 820", branch:"Acueducto", items:[{n:"Chirashi Don",q:1,p:"$230"},{n:"Gyoza (6 pzs)",q:2,p:"$95"},{n:"Cerveza Japonesa",q:2,p:"$80"}], total:"$480", status:"entregado", min:38, rep:"Carlos M." },
-];
-
-const REPARTIDORES = [
-    { nombre:"Carlos M.", inicial:"CM", tel:"55 0001 1111", status:"ocupado", pedido:"#1043" },
-    { nombre:"Héctor R.", inicial:"HR", tel:"55 0002 2222", status:"ocupado", pedido:"#1046" },
-    { nombre:"Paola S.", inicial:"PS", tel:"55 0003 3333", status:"libre", pedido:null },
-    { nombre:"Miguel T.", inicial:"MT", tel:"55 0004 4444", status:"inactivo", pedido:null },
-];
+// ===== DATOS (desde API) =====
+let PEDIDOS      = [];
+let REPARTIDORES = [];
 
 const BRANCH_COLORS = { Hacienda:"#f97316", Tonanitla:"#8b5cf6", Acueducto:"#06b6d4" };
+const STATUS_MAP = { pending:"pendiente", assigned:"asignado", on_way:"en camino", delivered:"entregado", cancelled:"cancelado" };
 
 // ===== ESTADO =====
 let filtroSucursal = "todos";
 let filtroStatus   = "todos";
 let searchQ = "";
+
+// ===== CARGA DESDE API =====
+async function loadData() {
+    try {
+        const [ordRes, repRes] = await Promise.all([
+            fetch('../api/orders.php', { credentials:'same-origin' }),
+            fetch('../api/drivers.php', { credentials:'same-origin' })
+        ]);
+        const ordData = await ordRes.json();
+        const repData = await repRes.json();
+
+        if (ordData.ok) {
+            PEDIDOS = ordData.orders.map(o => ({
+                id:       '#' + String(o.id).padStart(4,'0'),
+                _id:      o.id,
+                cliente:  o.customer_name,
+                tel:      o.customer_phone,
+                dir:      o.customer_address,
+                branch:   o.branch_name,
+                branch_id:o.branch_id,
+                items:    (o.items||[]).map(i => ({ n:i.name, q:i.quantity, p:'$'+Number(i.unit_price).toFixed(0) })),
+                total:    '$' + Number(o.total).toFixed(0),
+                status:   STATUS_MAP[o.status] || o.status,
+                _status:  o.status,
+                payment:  o.payment_method,
+                change:   o.change_amount,
+                min:      Math.floor((Date.now() - new Date(o.created_at).getTime()) / 60000),
+                rep:      o.driver_name || null,
+                driver_id:o.driver_id,
+            }));
+        }
+
+        if (repData.ok) {
+            REPARTIDORES = repData.drivers.map(d => {
+                const assigned = PEDIDOS.find(p => p.driver_id == d.id && ['asignado','en camino'].includes(p.status));
+                return {
+                    id:      d.id,
+                    nombre:  d.name,
+                    inicial: d.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(),
+                    tel:     d.phone,
+                    status:  d.status === 'available' ? 'libre' : d.status === 'busy' ? 'ocupado' : 'inactivo',
+                    pedido:  assigned ? assigned.id : null,
+                };
+            });
+        }
+
+        renderAll();
+    } catch(e) {
+        console.error('Error cargando datos:', e);
+    }
+}
+
+// Polling cada 12 segundos
+setInterval(loadData, 12000);
 
 // ===== RELOJ =====
 function updateClock() {
@@ -423,10 +463,13 @@ function renderOrders() {
                 </div>
             </div>
 
-            ${p.status === "pendiente" ? `
-            <div class="order-actions">
-                <button class="btn-order" onclick="cambiarStatus('${p.id}','cancelado')">Cancelar</button>
-                <button class="btn-order primary" onclick="cambiarStatus('${p.id}','en camino')">Enviar</button>
+            ${(p.status === "pendiente" || p.status === "asignado") ? `
+            <div class="order-actions" style="flex-direction:column;gap:8px">
+                ${!p.driver_id ? renderDriverSelect(p.id, p.branch_id) : ""}
+                <div style="display:flex;gap:6px;width:100%">
+                    <button class="btn-order" onclick="cambiarStatus('${p.id}','cancelado')" style="flex:1">Cancelar</button>
+                    <button class="btn-order primary" onclick="cambiarStatus('${p.id}','en camino')" style="flex:1">Enviar</button>
+                </div>
             </div>` : ""}
             ${p.status === "en camino" ? `
             <div class="order-actions">
@@ -454,19 +497,30 @@ function renderRepartidores() {
 }
 
 // ===== ACCIONES =====
-function cambiarStatus(id, nuevoStatus) {
+const STATUS_REVERSE = { pendiente:"pending", asignado:"assigned", "en camino":"on_way", entregado:"delivered", cancelado:"cancelled" };
+
+async function cambiarStatus(id, nuevoStatus, driverId = null) {
     const p = PEDIDOS.find(x => x.id === id);
     if (!p) return;
-    p.status = nuevoStatus;
-    if (nuevoStatus === "en camino") {
-        const libre = REPARTIDORES.find(r => r.status === "libre");
-        if (libre) { libre.status = "ocupado"; libre.pedido = id; p.rep = libre.nombre; }
+
+    const body = { order_id: p._id, status: STATUS_REVERSE[nuevoStatus] || nuevoStatus };
+    if (driverId) body.driver_id = driverId;
+
+    try {
+        await fetch('../api/update-status.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify(body)
+        });
+        await loadData();
+    } catch(e) {
+        console.error('Error actualizando status:', e);
     }
-    if (nuevoStatus === "entregado" || nuevoStatus === "cancelado") {
-        const rep = REPARTIDORES.find(r => r.nombre === p.rep);
-        if (rep) { rep.status = "libre"; rep.pedido = null; }
-    }
-    renderAll();
+}
+
+async function asignarRepartidor(orderId, driverId) {
+    await cambiarStatus(orderId, "asignado", driverId);
 }
 
 // ===== TABS & FILTERS =====
@@ -506,7 +560,18 @@ function renderAll() {
     renderRepartidores();
 }
 
-renderAll();
+// Selector de repartidor para asignar manualmente desde el panel
+function renderDriverSelect(orderId, branchId) {
+    const libres = REPARTIDORES.filter(r => r.status === 'libre');
+    if (!libres.length) return `<span style="font-size:12px;color:var(--gris)">Sin repartidores disponibles</span>`;
+    const opts = libres.map(r => `<option value="${r.id}">${r.nombre}</option>`).join('');
+    return `<div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+        <select id="sel-${orderId}" style="flex:1;padding:6px 8px;background:var(--card-bg,#181818);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:12px">${opts}</select>
+        <button class="btn-order primary" onclick="asignarRepartidor('${orderId}', document.getElementById('sel-${orderId}').value)" style="font-size:12px;padding:7px 12px">Asignar</button>
+    </div>`;
+}
+
+loadData();
 
 // Verificar autenticacion al cargar
 (async function() {

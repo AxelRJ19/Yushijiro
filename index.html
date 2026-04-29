@@ -41,8 +41,8 @@
                 <p class="etiqueta">Cocina japonesa tradicional y moderna</p>
                 <h1>Vive Japón en cada bocado</h1>
                 <div class="acciones-hero">
-                    <a class="btn btn-primario" href="#sucursales">Ver sucursales</a>
-                    <a class="btn btn-linea" href="#contacto">Pedir por WhatsApp</a>
+                    <button class="btn btn-primario" id="btn-pedir-dom" type="button">Pedir a domicilio</button>
+                    <a class="btn btn-linea" href="#sucursales">Ver sucursales</a>
                 </div>
             </div>
         </section>
@@ -350,6 +350,542 @@
         window.addEventListener("scroll", revealOnScroll);
         window.addEventListener("load", revealOnScroll);
     </script>
+
+<!-- ===== MODAL PEDIDO ===== -->
+<style>
+#order-overlay{position:fixed;inset:0;z-index:1200;background:rgba(0,0,0,0.75);display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+#order-overlay[hidden]{display:none}
+#order-panel{width:100%;max-width:480px;max-height:90dvh;background:#0f0f1a;border:1px solid rgba(200,169,110,0.25);border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden;position:relative}
+#order-head{padding:18px 20px 12px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#order-head h2{font-size:16px;color:#e8dcc8;margin:0}
+#order-close-btn{background:rgba(255,255,255,0.08);border:0;width:30px;height:30px;border-radius:50%;cursor:pointer;color:#e8dcc8;font-size:18px;display:flex;align-items:center;justify-content:center;line-height:1}
+#order-steps-bar{display:flex;gap:6px;padding:0 20px 14px;flex-shrink:0}
+.ostep-dot{height:4px;flex:1;border-radius:2px;background:rgba(255,255,255,0.12);transition:background 0.3s}
+.ostep-dot.done{background:#c8a96e}
+#order-body{flex:1;overflow-y:auto;padding:0 20px 20px;scrollbar-width:thin;scrollbar-color:#c8a96e33 transparent}
+.order-step{display:none}
+.order-step.active{display:block}
+
+/* Step 1 - Location */
+.loc-spinner{text-align:center;padding:40px 0;color:#888;font-size:14px}
+.loc-spinner .spin{width:36px;height:36px;border:3px solid rgba(200,169,110,0.2);border-top-color:#c8a96e;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loc-branch-card{background:rgba(200,169,110,0.08);border:1px solid rgba(200,169,110,0.3);border-radius:14px;padding:18px;text-align:center;margin:8px 0 16px}
+.loc-branch-card h3{color:#c8a96e;font-size:20px;margin:6px 0 4px}
+.loc-branch-card p{font-size:13px;color:#888;margin:0}
+.loc-error-card{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:14px;padding:16px;margin:8px 0 12px}
+.loc-error-card p{font-size:13px;color:#f87171;margin:0 0 10px}
+
+/* Step 2 - Menu */
+.menu-cat-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;flex-shrink:0}
+.menu-cat-tabs::-webkit-scrollbar{display:none}
+.cat-tab{flex-shrink:0;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid rgba(200,169,110,0.3);background:transparent;color:#888;cursor:pointer;transition:all 0.2s}
+.cat-tab.active{background:#c8a96e;color:#1a1209;border-color:#c8a96e}
+.menu-item-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.menu-item-row:last-child{border-bottom:0}
+.menu-item-info{flex:1}
+.menu-item-info strong{font-size:14px;color:#e8dcc8;display:block}
+.menu-item-info span{font-size:12px;color:#888}
+.menu-item-price{font-size:14px;color:#c8a96e;font-weight:600;margin:0 12px}
+.qty-ctrl{display:flex;align-items:center;gap:6px}
+.qty-btn{width:28px;height:28px;border-radius:8px;border:1px solid rgba(200,169,110,0.4);background:rgba(200,169,110,0.1);color:#c8a96e;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.qty-btn:active{background:rgba(200,169,110,0.25)}
+.qty-num{min-width:20px;text-align:center;font-size:14px;color:#e8dcc8;font-weight:600}
+.cart-bar{position:sticky;bottom:0;background:#0f0f1a;border-top:1px solid rgba(255,255,255,0.07);padding:12px 0 4px;margin-top:10px}
+.cart-bar-inner{background:#c8a96e;border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.cart-bar-inner:active{opacity:0.9}
+.cart-bar-left{font-size:13px;color:#1a1209}
+.cart-bar-left strong{display:block;font-size:15px}
+.cart-bar-right{font-size:14px;font-weight:700;color:#1a1209}
+
+/* Step 3 - Info */
+.ofield{display:grid;gap:5px;margin-bottom:14px}
+.ofield label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.06em}
+.ofield input,.ofield textarea{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 14px;color:#e8dcc8;font-size:14px;outline:none;font-family:inherit;transition:border-color 0.2s;width:100%}
+.ofield input:focus,.ofield textarea:focus{border-color:rgba(200,169,110,0.5)}
+.ofield input::placeholder,.ofield textarea::placeholder{color:#555}
+.ofield textarea{resize:none;height:70px}
+
+/* Step 4 - Payment */
+.pago-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.pago-opt{padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);cursor:pointer;text-align:center;transition:all 0.2s}
+.pago-opt.selected{border-color:#c8a96e;background:rgba(200,169,110,0.1)}
+.pago-opt strong{display:block;font-size:14px;color:#e8dcc8}
+.pago-opt span{font-size:11px;color:#888}
+.order-summary-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;margin-bottom:16px}
+.osummary-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:#e8dcc8}
+.osummary-row.total{border-top:1px solid rgba(255,255,255,0.1);margin-top:6px;padding-top:10px;font-size:16px;font-weight:700}
+.osummary-row.total span{color:#888}
+
+/* Step 5 - Success */
+.success-icon{width:80px;height:80px;border-radius:50%;background:rgba(34,197,94,0.12);border:2px solid rgba(34,197,94,0.4);display:flex;align-items:center;justify-content:center;margin:20px auto 16px;animation:pop 0.4s ease}
+@keyframes pop{0%{transform:scale(0.5);opacity:0}80%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+.success-icon svg{width:36px;height:36px;color:#22c55e}
+.success-body{text-align:center;padding:0 8px 10px}
+.success-body h2{font-size:22px;color:#e8dcc8;margin:0 0 8px}
+.success-body p{font-size:14px;color:#888;margin:0 0 6px}
+.success-order-id{font-size:28px;font-weight:700;color:#c8a96e;margin:8px 0}
+.success-info-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;margin:14px 0;text-align:left}
+.sinfo-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:#e8dcc8}
+.sinfo-row span:first-child{color:#888}
+
+/* Buttons */
+.obtn-primary{width:100%;background:#c8a96e;color:#1a1209;border:0;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;margin-top:4px}
+.obtn-primary:hover{background:#d4b57e}
+.obtn-primary:active{opacity:0.9;transform:scale(0.99)}
+.obtn-primary:disabled{opacity:0.5;cursor:not-allowed}
+.obtn-ghost{width:100%;background:transparent;color:#c8a96e;border:1px solid rgba(200,169,110,0.35);border-radius:12px;padding:13px;font-size:14px;cursor:pointer;font-family:inherit;transition:all 0.15s;margin-top:8px}
+.obtn-ghost:hover{background:rgba(200,169,110,0.08)}
+.oselect{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 14px;color:#e8dcc8;font-size:14px;outline:none;font-family:inherit;width:100%;margin-top:8px;appearance:none;cursor:pointer}
+.oerr{font-size:12px;color:#f87171;margin-top:4px;display:none}
+</style>
+
+<div id="order-overlay" hidden>
+    <button id="order-backdrop" type="button" style="position:absolute;inset:0;width:100%;height:100%;background:transparent;border:0;cursor:default" aria-label="Cerrar"></button>
+    <div id="order-panel" role="dialog" aria-modal="true" aria-labelledby="order-panel-title">
+        <div id="order-head">
+            <h2 id="order-panel-title">Pedir a domicilio</h2>
+            <button id="order-close-btn" type="button" aria-label="Cerrar">×</button>
+        </div>
+        <div id="order-steps-bar">
+            <div class="ostep-dot done" id="sdot-1"></div>
+            <div class="ostep-dot" id="sdot-2"></div>
+            <div class="ostep-dot" id="sdot-3"></div>
+            <div class="ostep-dot" id="sdot-4"></div>
+        </div>
+        <div id="order-body">
+
+            <!-- STEP 1: Localización -->
+            <div class="order-step active" id="ostep-1">
+                <div class="loc-spinner" id="loc-spinner">
+                    <div class="spin"></div>
+                    Detectando tu ubicación...
+                </div>
+                <div id="loc-result" hidden>
+                    <p style="font-size:13px;color:#888;margin:0 0 4px">Sucursal más cercana a ti:</p>
+                    <div class="loc-branch-card">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c8a96e" stroke-width="2" style="margin-bottom:4px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <h3 id="loc-branch-name">—</h3>
+                        <p id="loc-distance"></p>
+                    </div>
+                    <button class="obtn-primary" onclick="confirmBranch()">Ordenar de <span id="loc-btn-branch">esta sucursal</span></button>
+                </div>
+                <div id="loc-error" hidden>
+                    <div class="loc-error-card">
+                        <p>No pudimos obtener tu ubicación. Selecciona una sucursal manualmente.</p>
+                    </div>
+                    <select class="oselect" id="loc-manual-sel">
+                        <option value="">Selecciona sucursal...</option>
+                    </select>
+                    <div class="oerr" id="loc-manual-err">Selecciona una sucursal para continuar.</div>
+                    <button class="obtn-primary" style="margin-top:12px" onclick="manualBranchContinue()">Continuar</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Menú -->
+            <div class="order-step" id="ostep-2">
+                <div class="menu-cat-tabs" id="menu-cat-tabs"></div>
+                <div id="menu-items-list"></div>
+                <div class="cart-bar" id="cart-bar">
+                    <div class="cart-bar-inner" onclick="goOrderStep(3)" id="cart-bar-inner">
+                        <div class="cart-bar-left">
+                            <strong id="cart-count-label">0 productos</strong>
+                            Ver resumen
+                        </div>
+                        <span class="cart-bar-right" id="cart-total-label">$0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Datos del cliente -->
+            <div class="order-step" id="ostep-3">
+                <p style="font-size:13px;color:#888;margin:0 0 16px">¿A dónde enviamos tu pedido?</p>
+                <div class="ofield">
+                    <label>Nombre completo</label>
+                    <input type="text" id="info-name" placeholder="ej. María González" autocomplete="name">
+                </div>
+                <div class="ofield">
+                    <label>Teléfono</label>
+                    <input type="tel" id="info-phone" placeholder="55 1234 5678" autocomplete="tel">
+                </div>
+                <div class="ofield">
+                    <label>Dirección de entrega</label>
+                    <textarea id="info-address" placeholder="Calle, número, colonia, referencias..."></textarea>
+                </div>
+                <div class="oerr" id="info-err">Completa todos los campos.</div>
+                <button class="obtn-primary" onclick="goOrderStep(4)">Continuar al pago</button>
+                <button class="obtn-ghost" onclick="goOrderStep(2)">← Volver al menú</button>
+            </div>
+
+            <!-- STEP 4: Pago y confirmación -->
+            <div class="order-step" id="ostep-4">
+                <p style="font-size:13px;color:#888;margin:0 0 12px">¿Cómo vas a pagar?</p>
+                <div class="pago-opts">
+                    <div class="pago-opt selected" id="popt-cash" onclick="selectPago('cash')">
+                        <strong>💵 Efectivo</strong>
+                        <span>Paga al recibir</span>
+                    </div>
+                    <div class="pago-opt" id="popt-card" onclick="selectPago('card')">
+                        <strong>💳 Tarjeta</strong>
+                        <span>Coordinar al recibir</span>
+                    </div>
+                </div>
+                <div id="cash-row" style="margin-bottom:14px">
+                    <div class="ofield">
+                        <label>¿Con cuánto vas a pagar?</label>
+                        <input type="number" id="cash-received" placeholder="ej. 500" min="0" step="50">
+                        <span id="cambio-preview" style="font-size:12px;color:#c8a96e;margin-top:4px;display:none"></span>
+                    </div>
+                    <div class="oerr" id="cash-err">El monto debe ser mayor o igual al total.</div>
+                </div>
+                <div class="order-summary-box" id="pay-summary-box"></div>
+                <div class="oerr" id="pay-err">Ocurrió un error. Intenta de nuevo.</div>
+                <button class="obtn-primary" id="btn-confirm-order" onclick="submitOrder()">✓ Confirmar pedido</button>
+                <button class="obtn-ghost" onclick="goOrderStep(3)">← Volver a datos</button>
+            </div>
+
+            <!-- STEP 5: Éxito -->
+            <div class="order-step" id="ostep-5">
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div class="success-body">
+                    <h2>¡Pedido realizado!</h2>
+                    <p>Tu orden fue registrada con éxito.</p>
+                    <div class="success-order-id">#<span id="ok-order-id">—</span></div>
+                    <p id="ok-driver-msg" style="color:#22c55e;font-weight:600"></p>
+                    <div class="success-info-box" id="ok-info-box"></div>
+                    <button class="obtn-primary" onclick="closeOrderModal()">Cerrar</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== ORDER MODAL STATE =====
+const OD = {
+    branch: null,       // { id, name, distance_km }
+    allBranches: [],    // loaded from nearest-branch fallback
+    menu: {},           // { category: [items] }
+    cart: {},           // { item_id: { item, qty } }
+    info: {},           // { name, phone, address }
+    payment: 'cash',
+    cashReceived: 0,
+    currentCat: null,
+    currentStep: 1,
+};
+
+// Open / close
+document.getElementById("btn-pedir-dom").addEventListener("click", openOrderModal);
+document.getElementById("order-close-btn").addEventListener("click", closeOrderModal);
+document.getElementById("order-backdrop").addEventListener("click", closeOrderModal);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !document.getElementById("order-overlay").hidden) closeOrderModal(); });
+
+function openOrderModal() {
+    const overlay = document.getElementById("order-overlay");
+    overlay.hidden = false;
+    document.body.style.overflow = "hidden";
+    resetOrderModal();
+    detectLocation();
+}
+
+function closeOrderModal() {
+    document.getElementById("order-overlay").hidden = true;
+    document.body.style.overflow = "";
+}
+
+function resetOrderModal() {
+    OD.branch = null; OD.cart = {}; OD.info = {}; OD.payment = "cash"; OD.cashReceived = 0; OD.currentStep = 1;
+    showOrderStep(1);
+    document.getElementById("loc-spinner").hidden = false;
+    document.getElementById("loc-result").hidden = true;
+    document.getElementById("loc-error").hidden = true;
+}
+
+function showOrderStep(n) {
+    OD.currentStep = n;
+    document.querySelectorAll(".order-step").forEach(s => s.classList.remove("active"));
+    document.getElementById("ostep-" + n).classList.add("active");
+    for (let i = 1; i <= 4; i++) {
+        const dot = document.getElementById("sdot-" + i);
+        if (dot) dot.className = "ostep-dot" + (i <= n ? " done" : "");
+    }
+    document.getElementById("order-body").scrollTop = 0;
+}
+
+function goOrderStep(n) {
+    if (n === 3 && !validateInfo3()) return;
+    if (n === 4) {
+        if (!validateInfo3()) return;
+        renderPaySummary();
+    }
+    showOrderStep(n);
+}
+
+// ===== STEP 1: LOCATION =====
+async function detectLocation() {
+    showOrderStep(1);
+    if (!navigator.geolocation) { showLocError(); return; }
+    navigator.geolocation.getCurrentPosition(
+        async pos => {
+            const { latitude: lat, longitude: lng } = pos.coords;
+            try {
+                const res = await fetch(`api/nearest-branch.php?lat=${lat}&lng=${lng}`);
+                const data = await res.json();
+                if (data.ok && data.branch) {
+                    OD.branch = data.branch;
+                    document.getElementById("loc-branch-name").textContent = data.branch.name;
+                    document.getElementById("loc-btn-branch").textContent = data.branch.name;
+                    document.getElementById("loc-distance").textContent =
+                        data.branch.distance_km < 1
+                        ? `${Math.round(data.branch.distance_km * 1000)} m de distancia`
+                        : `${data.branch.distance_km.toFixed(1)} km de distancia`;
+                    document.getElementById("loc-spinner").hidden = true;
+                    document.getElementById("loc-result").hidden = false;
+                } else { showLocError(); }
+            } catch { showLocError(); }
+        },
+        () => showLocError(),
+        { timeout: 8000 }
+    );
+    await loadBranches();
+    await loadMenu();
+}
+
+async function loadBranches() {
+    try {
+        const res = await fetch("api/nearest-branch.php?lat=0&lng=0");
+        const data = await res.json();
+        if (data.all_branches) {
+            OD.allBranches = data.all_branches;
+            const sel = document.getElementById("loc-manual-sel");
+            OD.allBranches.forEach(b => {
+                const opt = document.createElement("option");
+                opt.value = b.id;
+                opt.textContent = b.name;
+                sel.appendChild(opt);
+            });
+        }
+    } catch {}
+}
+
+function showLocError() {
+    document.getElementById("loc-spinner").hidden = true;
+    document.getElementById("loc-result").hidden = true;
+    document.getElementById("loc-error").hidden = false;
+}
+
+function confirmBranch() {
+    showOrderStep(2);
+    renderMenu();
+}
+
+function manualBranchContinue() {
+    const sel = document.getElementById("loc-manual-sel");
+    const err = document.getElementById("loc-manual-err");
+    if (!sel.value) { err.style.display = "block"; return; }
+    err.style.display = "none";
+    const b = OD.allBranches.find(x => String(x.id) === sel.value);
+    if (b) OD.branch = b;
+    else OD.branch = { id: parseInt(sel.value), name: sel.options[sel.selectedIndex].text };
+    showOrderStep(2);
+    renderMenu();
+}
+
+// ===== STEP 2: MENU =====
+async function loadMenu() {
+    try {
+        const res = await fetch("api/menu.php");
+        const data = await res.json();
+        if (data.ok) OD.menu = data.menu;
+    } catch {}
+}
+
+function renderMenu() {
+    const cats = Object.keys(OD.menu);
+    const tabsEl = document.getElementById("menu-cat-tabs");
+    tabsEl.innerHTML = "";
+    if (!cats.length) {
+        document.getElementById("menu-items-list").innerHTML = '<p style="color:#888;font-size:14px;padding:20px 0">Menú no disponible. Contáctanos por WhatsApp.</p>';
+        return;
+    }
+    if (!OD.currentCat || !cats.includes(OD.currentCat)) OD.currentCat = cats[0];
+    cats.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = "cat-tab" + (cat === OD.currentCat ? " active" : "");
+        btn.textContent = cat;
+        btn.onclick = () => { OD.currentCat = cat; renderMenu(); };
+        tabsEl.appendChild(btn);
+    });
+    const items = OD.menu[OD.currentCat] || [];
+    document.getElementById("menu-items-list").innerHTML = items.map(item => `
+        <div class="menu-item-row">
+            <div class="menu-item-info">
+                <strong>${item.name}</strong>
+                ${item.description ? `<span>${item.description}</span>` : ""}
+            </div>
+            <span class="menu-item-price">$${Number(item.price).toFixed(0)}</span>
+            <div class="qty-ctrl">
+                <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+                <span class="qty-num" id="qty-${item.id}">${(OD.cart[item.id]?.qty)||0}</span>
+                <button class="qty-btn" onclick="changeQty(${item.id},1,'${item.name.replace(/'/g,"\\'")}',${item.price})">+</button>
+            </div>
+        </div>
+    `).join("");
+    updateCartBar();
+}
+
+function changeQty(id, delta, name, price) {
+    if (!OD.cart[id] && delta > 0) OD.cart[id] = { id, name, price, qty: 0 };
+    if (!OD.cart[id]) return;
+    OD.cart[id].qty = Math.max(0, OD.cart[id].qty + delta);
+    if (OD.cart[id].qty === 0) delete OD.cart[id];
+    const qEl = document.getElementById("qty-" + id);
+    if (qEl) qEl.textContent = OD.cart[id]?.qty || 0;
+    updateCartBar();
+}
+
+function cartTotal() {
+    return Object.values(OD.cart).reduce((s, x) => s + x.price * x.qty, 0);
+}
+function cartCount() {
+    return Object.values(OD.cart).reduce((s, x) => s + x.qty, 0);
+}
+
+function updateCartBar() {
+    const count = cartCount();
+    const total = cartTotal();
+    document.getElementById("cart-count-label").textContent = count + (count === 1 ? " producto" : " productos");
+    document.getElementById("cart-total-label").textContent = "$" + total.toFixed(0);
+    const bar = document.getElementById("cart-bar-inner");
+    bar.style.opacity = count > 0 ? "1" : "0.45";
+    bar.style.cursor = count > 0 ? "pointer" : "default";
+    bar.onclick = count > 0 ? () => goOrderStep(3) : null;
+}
+
+// ===== STEP 3: INFO VALIDATION =====
+function validateInfo3() {
+    if (OD.currentStep === 2 && cartCount() === 0) {
+        return false;
+    }
+    const name = document.getElementById("info-name")?.value.trim();
+    const phone = document.getElementById("info-phone")?.value.trim();
+    const address = document.getElementById("info-address")?.value.trim();
+    if (OD.currentStep >= 3) {
+        if (!name || !phone || !address) {
+            document.getElementById("info-err").style.display = "block";
+            return false;
+        }
+        document.getElementById("info-err").style.display = "none";
+        OD.info = { name, phone, address };
+    }
+    return true;
+}
+
+// ===== STEP 4: PAYMENT =====
+function selectPago(method) {
+    OD.payment = method;
+    document.getElementById("popt-cash").classList.toggle("selected", method === "cash");
+    document.getElementById("popt-card").classList.toggle("selected", method === "card");
+    document.getElementById("cash-row").style.display = method === "cash" ? "block" : "none";
+    renderPaySummary();
+}
+
+document.getElementById("cash-received").addEventListener("input", function() {
+    const total = cartTotal();
+    const v = parseFloat(this.value) || 0;
+    const prev = document.getElementById("cambio-preview");
+    if (v >= total && total > 0) {
+        prev.style.display = "block";
+        prev.textContent = "Cambio: $" + (v - total).toFixed(0);
+        document.getElementById("cash-err").style.display = "none";
+    } else {
+        prev.style.display = "none";
+        if (v > 0 && v < total) document.getElementById("cash-err").style.display = "block";
+        else document.getElementById("cash-err").style.display = "none";
+    }
+});
+
+function renderPaySummary() {
+    OD.info.name = document.getElementById("info-name").value.trim();
+    OD.info.phone = document.getElementById("info-phone").value.trim();
+    OD.info.address = document.getElementById("info-address").value.trim();
+    const total = cartTotal();
+    const items = Object.values(OD.cart);
+    let rows = items.map(x => `<div class="osummary-row"><span>${x.qty}× ${x.name}</span><span>$${(x.price*x.qty).toFixed(0)}</span></div>`).join("");
+    rows += `<div class="osummary-row total"><span>Total</span><strong>$${total.toFixed(0)}</strong></div>`;
+    rows += `<div class="osummary-row"><span style="color:#888">Entrega a</span><span style="text-align:right;max-width:60%">${OD.info.address}</span></div>`;
+    document.getElementById("pay-summary-box").innerHTML = rows;
+}
+
+async function submitOrder() {
+    const total = cartTotal();
+    if (OD.payment === "cash") {
+        OD.cashReceived = parseFloat(document.getElementById("cash-received").value) || 0;
+        if (OD.cashReceived < total) {
+            document.getElementById("cash-err").style.display = "block";
+            return;
+        }
+    }
+    const btn = document.getElementById("btn-confirm-order");
+    btn.disabled = true;
+    btn.textContent = "Enviando...";
+    document.getElementById("pay-err").style.display = "none";
+    const body = {
+        customer_name:    OD.info.name,
+        customer_phone:   OD.info.phone,
+        customer_address: OD.info.address,
+        branch_id:        OD.branch.id,
+        payment_method:   OD.payment,
+        items: Object.values(OD.cart).map(x => ({
+            menu_item_id: x.id,
+            name:         x.name,
+            qty:          x.qty,
+            unit_price:   x.price,
+        })),
+    };
+    if (OD.payment === "cash") body.cash_received = OD.cashReceived;
+    try {
+        const res = await fetch("api/create-order.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+            document.getElementById("pay-err").textContent = data.error || "Error al crear el pedido.";
+            document.getElementById("pay-err").style.display = "block";
+            btn.disabled = false; btn.textContent = "✓ Confirmar pedido";
+            return;
+        }
+        showSuccess(data);
+    } catch {
+        document.getElementById("pay-err").textContent = "Error de conexión. Intenta de nuevo.";
+        document.getElementById("pay-err").style.display = "block";
+        btn.disabled = false; btn.textContent = "✓ Confirmar pedido";
+    }
+}
+
+function showSuccess(data) {
+    document.getElementById("ok-order-id").textContent = String(data.order_id).padStart(4, "0");
+    document.getElementById("ok-driver-msg").textContent = data.driver_assigned
+        ? "Un repartidor fue asignado a tu pedido."
+        : "Tu pedido está en espera de un repartidor disponible.";
+    const total = data.total || cartTotal();
+    let infoHtml = `
+        <div class="sinfo-row"><span>Sucursal</span><span>${OD.branch.name}</span></div>
+        <div class="sinfo-row"><span>Total</span><span style="font-weight:700;color:#c8a96e">$${Number(total).toFixed(0)}</span></div>
+        <div class="sinfo-row"><span>Pago</span><span>${OD.payment === "cash" ? "Efectivo" : "Tarjeta"}</span></div>`;
+    if (data.change !== null && data.change !== undefined) {
+        infoHtml += `<div class="sinfo-row"><span>Cambio</span><span style="color:#22c55e">$${Number(data.change).toFixed(0)}</span></div>`;
+    }
+    infoHtml += `<div class="sinfo-row"><span>Entrega a</span><span style="text-align:right;max-width:55%">${OD.info.address}</span></div>`;
+    document.getElementById("ok-info-box").innerHTML = infoHtml;
+    showOrderStep(5);
+}
+</script>
 
 <!-- ===== CHAT IA ===== -->
 <style>
